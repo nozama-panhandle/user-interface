@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Unloading Page</title>
+	</head>
+	<body>
+		<h1>Nozama Panhandle</h1>
+		<h2><a href="http://mellon.andrew.cmu.edu:8888/maintenance">Maintence Mode</a></h2>
+		<h2>Page for Package Unloading</h2>
+		<script>
+			var package_color = ['Red', 'Green', 'Blue'];
+		</script>
+		<ul>
+			<script>
+				var color_idx = 0;
+				while (color_idx < package_color.length){
+					document.write('<li>'+package_color[color_idx]+'</li>');
+					color_idx = color_idx + 1;
+				}
+			</script>
+		</ul>
+	</body>
+</html>

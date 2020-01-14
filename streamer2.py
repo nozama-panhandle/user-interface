@@ -21,9 +21,6 @@ frame_rate = 30
 server="http://rpi-6.wifi.local.cmu.edu:8888/video_feed"
 #server="http://mellon.andrew.cmu.edu:8887/video_feed"
 VCap=cv2.VideoCapture(server)
-if not VCap.isOpened():
-    print("ERROR! Check the camera.")
-    exit(0)
 host_name = "rpi-6.wifi.local.cmu.edu"
 host_port = 7777
 if len(argv)>1:
@@ -70,9 +67,22 @@ def gen():
         time.sleep(1 / (10*frame_rate))
 
 @app.route("/")
+@app.route("/index")
 def index():
     """Route which renders the video within an HTML template"""
     return render_template("index.html")
+
+@app.route("/loading")
+def loading():
+    return render_template("loading.html")
+
+@app.route("/unloading")
+def unloading():
+    return render_template("unloading.html")
+
+@app.route("/maintenance")
+def maintenance():
+    return render_template("maintenance.html")
 
 @socketio.on('connect')
 def on_connect():
