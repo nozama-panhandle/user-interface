@@ -4,8 +4,19 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 </head>
 <body>
-    <h2><a href="http://mellon.andrew.cmu.edu:8888">Login</a></h2>
-    <h2><a href="http://mellon.andrew.cmu.edu:8888/loading">Loading</a></h2>
+    <h1>Nozama Panhandle</h1>
+    <h2>Access List</h2>
+    <ul>
+        <script>
+            var page_list = ['Loading', 'Unloading', 'Maintenance'];
+            var page_idx = 0;
+            while(page_idx < page_list.length) {
+                document.write('<li><a href="http://mellon.andrew.cmu.edu:8888/' + page_list[page_idx].toLowerCase() + '">' + page_list[page_idx] + '</a></li>');
+                page_idx = page_idx + 1;
+            }
+        </script>
+    </ul>
+    <h2>Page for System Maintenance</h2>
     <h3>line</h3>
     <img src="http://rpi-6.wifi.local.cmu.edu:8888/video_feed" width="640" height="480"></img>
     <p>W: forward, A: left, D: right, S: backward</p>
@@ -74,6 +85,11 @@ $(document).keyup(function(e){
             break;
     }
 });
+</script>
+<script>
+    function listing_pages(pages) {
+        var link = new Array(pages.length);
 
-
+        }
+    }
 </script>

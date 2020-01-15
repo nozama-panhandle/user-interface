@@ -14,12 +14,11 @@
             location.reload();
         }
     </script>
-    <script>
-        var page_list = ['Loading', 'Unloading', 'Maintenance'];
-    </script>
+    <h1>Nozama Panhandle</h1> 
     <h2>Access Lists</h2>
     <ul>
         <script>
+            var page_list = ['Loading', 'Unloading', 'Maintenance'];
             var page_idx = 0;
             while(page_idx < page_list.length) {
                 document.write('<li><a href="http://mellon.andrew.cmu.edu:8888/' + page_list[page_idx].toLowerCase() + '">' + page_list[page_idx] + '</a></li>');
