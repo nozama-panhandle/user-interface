@@ -67,7 +67,6 @@ def gen():
         time.sleep(1 / (10*frame_rate))
 
 @app.route("/")
-@app.route("/index")
 def index():
     """Route which renders the video within an HTML template"""
     return render_template("index.html")
