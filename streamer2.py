@@ -66,6 +66,8 @@ def gen():
         prefix = "\r\n"
         time.sleep(1 / (10*frame_rate))
 
+
+# Routing html pages in 'templates' folder
 @app.route("/")
 def index():
     """Route which renders the video within an HTML template"""
@@ -82,6 +84,7 @@ def unloading():
 @app.route("/maintenance")
 def maintenance():
     return render_template("maintenance.html")
+
 
 @socketio.on('connect')
 def on_connect():
