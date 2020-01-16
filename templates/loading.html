@@ -1,3 +1,39 @@
+<?php
+$con=mysqli_connect("wookjae","15232","1","2","3");
+// Check connection
+if (mysqli_connect_errno())
+{
+echo "Failed to connect to MySQL: " . mysqli_connect_error();
+}
+
+$result = mysqli_query($con,"SELECT * FROM Persons");
+
+echo "<table border='1'>
+<tr>
+<th>Customer Name</th>
+<th>Address</th>
+<th>Red</th>
+<th>Green</th>
+<th>Blue</th>
+</tr>";
+
+while($row = mysqli_fetch_array($result))
+{
+echo "<tr>";
+echo "<td>" . $row['CustomerName'] . "</td>";
+echo "<td>" . $row['Address'] . "</td>";
+echo "<td>" . $row['Red'] . "</td>";
+echo "<td>" . $row['Green'] . "</td>";
+echo "<td>" . $row['Blue'] . "</td>";
+
+echo "</tr>";
+}
+echo "</table>";
+
+mysqli_close($con);
+?>
+
+
 <!DOCTYPE html>
 <html>
 <head>
