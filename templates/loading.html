@@ -20,16 +20,15 @@
 
 	<h2>Page for Package Loading</h2>
 	<script>
-		var package_c = ['Red', 'Green', 'Blue'];
-		var package_u = ['Red', 'Green', 'Blue'];
+		var package_color = ['Red', 'Green', 'Blue'];
 	</script>
 	<h2>Current packages</h2>
 	<ul>
 		<script>
-			var color_idx_c = 0;
-			while(color_idx_c < package_c.length) {
-				document.write('<li>' + package_c[color_idx_c] + '</li>');
-				color_idx_c = color_idx_c + 1;
+			var color_idx = 0;
+			while(color_idx < package_color.length) {
+				document.write('<li>' + package_color[color_idx] + '</li>');
+				color_idx = color_idx + 1;
 			}
 		</script>
 	</ul>
@@ -37,10 +36,10 @@
 	<h2>Upcoming packages</h2>
 	<ul>
 		<script>
-			var color_idx_u = 0;
-			while(color_idx_u < package_u.length) {
-				document.write('<li>' + package_u[color_idx_u] + '<li>');
-				color_idx_u = color_idx_u + 1;
+			var color_idx = 0;
+			while(color_idx < package_color.length) {
+				document.write('<li>' + package_color[color_idx] + '</li>');
+				color_idx = color_idx + 1;
 			}
 		</script>
 	</ul>
@@ -49,8 +48,13 @@
 		function red_retrival() {
 			alert(red_retrival);
 		}
-		fetch('http://mellon.andrew.cmu.edu:3000/api/pending').then(function(response) {
-			console.log(response);
+		request = new Request('http://mellon.andrew.cmu.edu:3000/api/pending')
+
+		fetch(request, {mode: 'no-cors'}).then(function(response) {
+			console.log(response.status);
+			// response.text().then(function(text) {
+			// 	console.log(text);
+			// })
 		});
 	">
 </body>
