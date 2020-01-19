@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Loading Page</title>
+</head>
+<body>
+	<h1>Nozama Panhandle</h1>
+
+    <h2>Access List</h2>
+    <ul>
+        <script>
+            var page_list = ['Loading', 'Unloading', 'Maintenance'];
+            var page_idx = 0;
+            while(page_idx < page_list.length) {
+<!--                document.write('<li><a href="http://mellon.andrew.cmu.edu:8888/' + page_list[page_idx].toLowerCase() + '">' + page_list[page_idx] + '</a></li>');-->
+                document.write('<li><a href="/' + page_list[page_idx].toLowerCase() + '">' + page_list[page_idx] + '</a></li>');
+                page_idx = page_idx + 1;
+            }
+        </script>
+    </ul>
+
+	<h2>Page for Package Loading</h2>
+	<script>
+		var package_color = ['Red', 'Green', 'Blue'];
+	</script>
+	<h2>Current packages</h2>
+	<ul>
+		<script>
+			var color_idx = 0;
+			while(color_idx < package_color.length) {
+				document.write('<li>' + package_color[color_idx] + '</li>');
+				color_idx = color_idx + 1;
+			}
+		</script>
+	</ul>
+
+	<h2>Upcoming packages</h2>
+	<ul>
+		<script>
+			var color_idx = 0;
+			while(color_idx < package_color.length) {
+				document.write('<li>' + package_color[color_idx] + '</li>');
+				color_idx = color_idx + 1;
+			}
+		</script>
+	</ul>
+
+	<input type="button" value="red" onclick="
+		function red_retrival() {
+			alert(red_retrival);
+		}
+		request = new Request('http://mellon.andrew.cmu.edu:3000/api/pending')
+
+		fetch(request, {mode: 'no-cors'}).then(function(response) {
+			console.log(response.status);
+			// response.text().then(function(text) {
+			// 	console.log(text);
+			// })
+		});
+	">
+</body>
+</html>
