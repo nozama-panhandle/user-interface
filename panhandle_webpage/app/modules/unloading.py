@@ -7,10 +7,8 @@ bp = Blueprint("unloading_bp", __name__, url_prefix="/")
 @bp.route("/unloading", methods = ["GET"])
 def unloading():
     db_select = database.Database()
-    sql = "SELECT address FROM orderdb.orders"
-    row = db_select.executeAll(sql)
-
-    print(row)
+    sql = "SELECT red, blue, green, pending=1, address FROM orderdb.orders"
+    selected_data = db_select.executeAll(sql)
 
     return render_template("/pages/unloading.html",
-                           data=row[0])
+                           current_data=selected_data[0])
