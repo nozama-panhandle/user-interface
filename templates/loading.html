@@ -50,7 +50,7 @@
 		}
 		request = new Request('http://mellon.andrew.cmu.edu:3000/api/pending')
 
-		fetch(request, {mode: 'no-cors'}).then(function(response) {
+		fetch(request).then(function(response) {
 			console.log(response.status);
 			// response.text().then(function(text) {
 			// 	console.log(text);

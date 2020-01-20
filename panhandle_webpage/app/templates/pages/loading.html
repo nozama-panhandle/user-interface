@@ -3,7 +3,7 @@
 <head>
 	<title>Loading Page</title>
 </head>
-<body>
+body>
 	<h1>Nozama Panhandle</h1>
 
     <h2>Access List</h2>
@@ -23,7 +23,10 @@
 	<script>
 		var package_color = ['Red', 'Green', 'Blue'];
 	</script>
-	<h2>Current packages</h2>
+	<h2>Current Delivery</h2>
+    <span> Red : {{current_red}} </span>
+    <span> Green : {{current_green}} </span>
+    <span> Blue : {{current_blue}} </span>
 	<ul>
 		<script>
 			var color_idx = 0;
@@ -44,19 +47,5 @@
 			}
 		</script>
 	</ul>
-
-	<input type="button" value="red" onclick="
-		function red_retrival() {
-			alert(red_retrival);
-		}
-		request = new Request('http://mellon.andrew.cmu.edu:3000/api/pending')
-
-		fetch(request, {mode: 'no-cors'}).then(function(response) {
-			console.log(response.status);
-			// response.text().then(function(text) {
-			// 	console.log(text);
-			// })
-		});
-	">
 </body>
 </html>

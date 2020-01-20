@@ -22,31 +22,15 @@
 		var package_color = ['Red', 'Green', 'Blue'];
 	</script>
 	<h2>Current Delivery</h2>
-	<div> Address : {{current_data.address}} </div>
-	<span> Red : {{current_data.red}} <br></span>
-	<span> Green : {{current_data.green}} <br></span>
-	<span> Blue : {{current_data.blue}} <br></span>
-	<ul>
-		<li>Address</li>
-		<script>
-			var color_idx = 0;
-			while (color_idx < package_color.length){
-				document.write('<li>'+package_color[color_idx]+'</li>');
-				color_idx = color_idx + 1;
-			}
-		</script>
-	</ul>
+	<div> Address : {{current_unload.address}} </div>
+	<span> Red : {{current_unload.red}} </span>
+	<span> Green : {{current_unload.green}} </span>
+	<span> Blue : {{current_unload.blue}} </span>
 
 	<h2>Next Delivery</h2>
-	<ul>
-		<li>Address</li>
-		<script>
-			var color_idx = 0;
-			while (color_idx < package_color.length){
-				document.write('<li>'+package_color[color_idx]+'</li>');
-				color_idx = color_idx + 1;
-			}
-		</script>
-	</ul>
+	<div> Address : {{next_unload.address}} </div>
+	<span> Red : {{next_unload.red}} </span>
+	<span> Green : {{next_unload.green}} </span>
+	<span> Blue : {{next_unload.blue}} </span>
 </body>
 </html>
