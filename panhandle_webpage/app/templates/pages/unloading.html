@@ -22,6 +22,20 @@
 		var package_color = ['Red', 'Green', 'Blue'];
 	</script>
 	<h2>Current Delivery</h2>
+	<table style="width:100%">
+	  <tr>
+	    <th>Address</th>
+	    <th>Red</th>
+	    <th>Green</th>
+	    <th>Blue</th>
+	  </tr>
+	  <tr>
+	    <td>{{current_unload.address}}</td>
+	    <td>{{current_unload.red}}</td>
+	    <td>{{current_unload.green}}</td>
+	    <td>{{current_unload.blue}}</td>  
+	  </tr>
+	</table>
 	<div> Address : {{current_unload.address}} </div>
 	<span> Red : {{current_unload.red}} </span>
 	<span> Green : {{current_unload.green}} </span>
