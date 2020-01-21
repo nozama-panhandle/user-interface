@@ -12,4 +12,4 @@ def unloading():
 
     return render_template("/pages/unloading.html",
                            current_unload=selected_data[0],
-                           next_unload=selected_data[1])
+                           next_unload=selected_data[1:])
