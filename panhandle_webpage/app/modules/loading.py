@@ -11,9 +11,10 @@ def loading():
     selected_data = db_select.executeAll(sql)
 
     try:
-        data_per_3 = selected_data[0:2]
+        data_per_3 = selected_data[0:3]
         print(data_per_3[0]['red'])
         print(type(data_per_3[0]))
+        print(len(data_per_3))
 
         red_sum = 0
         green_sum = 0
