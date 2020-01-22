@@ -91,13 +91,14 @@
 	    <th>Blue</th>
 	  </tr>
 	<script>
+		var next_delivery = next_unload
 		var mytable = "<table cellpadding=\"0\" cellspacing=\"0\"><tbody><tr>";
 
 		for (var i = 1; i < 6 ; i++) {
 		    if (i % 4 == 1 && i != 1) {
 			mytable += "</tr><tr>";
 		    }
-		    mytable += "<td>" + i + "</td>";
+		    mytable += "<td>\t" + i + "\t</td>";
 		}
 
 		mytable += "</tr></tbody></table>";
