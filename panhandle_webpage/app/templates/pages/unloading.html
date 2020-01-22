@@ -102,7 +102,7 @@
 		  var red = {{next.red}};
 		  var green = {{next.green}};
 		  var blue = {{next.blue}};
-		  $('#next_table > tbody:last-child').append('<tr><td>' + address + '</td><td>' + red + '</td><td>' + green + '</td><td>' + blue '</td></tr>');
+		  $('#next_table > tbody').append('<tr><td>' + address + '</td><td>' + red + '</td><td>' + green + '</td><td>' + blue '</td></tr>');
 		 {% endfor %}
 	});
 	</script>
