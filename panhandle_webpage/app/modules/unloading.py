@@ -11,5 +11,6 @@ def unloading():
     selected_data = db_select.executeAll(sql)
 
     return render_template("/pages/unloading.html",
+                           title="Unloading",
                            current_unload=selected_data[0],
                            next_unload=selected_data[1:])

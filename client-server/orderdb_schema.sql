@@ -40,7 +40,20 @@ CREATE TABLE `orders` (
 -- Dumping data for table `orders`
 --
 
+DROP TABLE IF EXISTS `inventory`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `inventory`(
+   `red` int(11) DEFAULT 26,
+   `blue` int(11) DEFAULT 26,
+   `green` int(11) DEFAULT 26,
+   PRIMARY KEY (`red`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
 LOCK TABLES `orders` WRITE;
+LOCK TABLES `inventory` WRITE;
+
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -53,5 +66,4 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
 -- Dump completed on 2019-11-04 18:39:15
