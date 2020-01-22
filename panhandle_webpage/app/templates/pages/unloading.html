@@ -80,8 +80,7 @@
 	  </tr>
 	</table>
 	
-	<div class="container-fluid">
-	  <table class="table" id="next_table">
+	  <table id="next_table">
 	    <thead>
 	      <tr>
 		<th>Address</th>
@@ -94,7 +93,6 @@
 	      <tr></tr>
 	    </tbody>
 	  </table>
-	</div>
 	
 	<script type="text/javascript">
 
@@ -103,7 +101,6 @@
 	  var red = {{next.red}};
 	  var green = {{next.green}};
 	  var blue = {{next.blue}};
-	  document.write(address);
 	  $('#next_table > tbody:last-child').append('<tr><td>' + address + '</td><td>' + red + '</td><td>' + green + '</td><td>' + blue '</td></tr>');
 	 {% endfor %}
 
