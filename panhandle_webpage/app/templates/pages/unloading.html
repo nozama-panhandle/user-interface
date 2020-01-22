@@ -80,6 +80,8 @@
 	  </tr>
 	</table>
 	
+	<p></p>
+	
 	  <table id="next_table">
 	    <thead>
 	      <tr>
@@ -95,16 +97,19 @@
 	  </table>
 	
 	<script type="text/javascript">
-	$(function() {
-
-		{% for next in next_unload %}
-		  var address = {{next.address}};
-		  var red = {{next.red}};
-		  var green = {{next.green}};
-		  var blue = {{next.blue}};
-		  $('#next_table > tbody').append('<tr><td>' + address + '</td><td>' + red + '</td><td>' + green + '</td><td>' + blue '</td></tr>');
-		 {% endfor %}
-	});
+	{% for next in next_unload %}
+	  var address = {{next.address}};
+	  var red = {{next.red}};
+	  var green = {{next.green}};
+	  var blue = {{next.blue}};
+	  $('#next_table > tbody').append('<tr><td>' + address + '</td><td>' + red + '</td><td>' + green + '</td><td>' + blue '</td></tr>');
+	  var table = document.getElementById("next_table");
+	  var row = table.insertRow(0);
+	  var cell1 = row.insertCell(0);
+	  var cell2 = row.insertCell(1);
+	  cell1.innerHTML = "NEW CELL1";
+	  cell2.innerHTML = "NEW CELL2";
+	 {% endfor %}
 	</script>
 	
 	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
