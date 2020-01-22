@@ -42,7 +42,7 @@
 	    <td>{{current_unload.red}}</td>
 	    <td>{{current_unload.green}}</td>
 	    <td>{{current_unload.blue}}</td>  
-		  <td><button onclick="myFunction()">Click me</button></td>
+		  <td><button onclick="myFunction()">Clear</button></td>
 	  </tr>
 	</table>
 <!-- 	<div> Address : {{current_unload.address}} </div>
@@ -51,6 +51,21 @@
 	<span> Blue : {{current_unload.blue}} </span> -->
 
 	<h2>Next Delivery</h2>
+	<table>
+	  <tr>
+	    <th>Address</th>
+	    <th>Red</th>
+	    <th>Green</th>
+	    <th>Blue</th>
+	  </tr>
+	  <tr>
+	    <td>{{next_unload.address}}</td>
+	    <td>{{next_unload.red}}</td>
+	    <td>{{next_unload.green}}</td>
+	    <td>{{next_unload.blue}}</td>  
+		  <td><button onclick="myFunction()">Clear</button></td>
+	  </tr>
+	</table>
 	<div> Address : {{next_unload.address}} </div>
 	<span> Red : {{next_unload.red}} </span>
 	<span> Green : {{next_unload.green}} </span>
