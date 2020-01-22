@@ -81,16 +81,13 @@
 	</table>
 	<script type="text/javascript">
 
-	  $(function() {
-	    for (const next of next_unload) {
-		const address = next.address;
-		const red = next.red;
-		const green = next.green;
-		const blue = next.blue;
-		    
-		$('#table1 > tbody:last-child').append('<tr><td>' + address + '</td><td>' + red + '</td></tr>' + green + '</td></tr>' + blue + '</td></tr>');
-	    } 
-	});
+	{% for next in next_unload %}
+	  var address = {{next.address}};
+	  var red = {{next.red}};
+	  var green = {{next.green}};
+	  var blue = {{next.blue}};
+	  document.write(address)
+	 {% end for %}
 
 	</script>
 	
