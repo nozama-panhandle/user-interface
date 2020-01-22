@@ -46,13 +46,13 @@ var socket=io.connect('http://'+document.domain+':'+location.port);
 socket.on('connect', function(){console.log('Connected!');});
 
 //$(document).keypress(function(e){
-//    socket.emit('button', e['key']+" p");
+//    socket.emit('keypress', e['key']+" p");
 //    console.log(e['key']+ ' p')
 //});
 
 $(document).keydown(function(e){
     key=e['key']
-    socket.emit('button', e['key']+" d");
+    socket.emit('keypress', e['key']+" d");
     console.log(e['key']+' down')
     switch(key){
         case 'w':
@@ -71,7 +71,7 @@ $(document).keydown(function(e){
 });
 $(document).keyup(function(e){
     key=e['key']
-    //socket.emit('button', e['key']+" u");
+    //socket.emit('keypress', e['key']+" u");
     console.log(e['key']+' up')
     switch(key){
         case 'w':
