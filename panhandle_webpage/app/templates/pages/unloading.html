@@ -79,10 +79,19 @@
 	    <td>{{next_unload[3].blue}}</td>  
 	  </tr>
 	</table>
-	<script>
-		document.write({{next_unload}});
-		document.write({{next_unload[1].address}});
-		
+	<script type="text/javascript">
+
+	  $(function() {
+	    for (const next of next_unload) {
+		const address = next.address;
+		const red = next.red;
+		const green = next.green;
+		const blue = next.blue;
+		    
+		$('#table1 > tbody:last-child').append('<tr><td>' + address + '</td><td>' + red + '</td></tr>' + green + '</td></tr>' + blue + '</td></tr>');
+	    } 
+	});
+
 	</script>
 	
 	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
