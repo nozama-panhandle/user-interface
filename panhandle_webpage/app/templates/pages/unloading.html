@@ -83,29 +83,9 @@
 	    <td>{{next_unload[3].blue}}</td>  
 	  </tr>
 	</table>
-	<table>
-	  <tr>
-	    <th>Address</th>
-	    <th>Red</th>
-	    <th>Green</th>
-	    <th>Blue</th>
-	  </tr>
-	</table>
 	<script>
 		var next_delivery = {{next_unload}}
-		window.alert(2);
-		var mytable = "<table cellpadding=\"0\" cellspacing=\"0\"><tbody><tr>";
-
-		for (var i = 1; i < next_delivery.length ; i++) {
-		    if (i % 4 == 1 && i != 1) {
-			mytable += "</tr><tr>";
-		    }
-		    mytable += "<td>" + next_delivery[i] + "\t</td>";
-		}
-
-		mytable += "</tr></tbody></table>";
-
-		document.write(1);
+		document.write(next_delivery);
 		
 	</script>
 	
