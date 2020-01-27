@@ -21,6 +21,11 @@ class Database():
         self.cursor.execute(query, args)
         row = self.cursor.fetchall()
         return row
+    
+#    def update(self, query, args={}_:
+#        self.cursor.execute(query, args)
+#        self.db.commit()
+#        return 0
 
     def commit(self):
         self.db.commit()

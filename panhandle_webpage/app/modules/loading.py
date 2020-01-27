@@ -7,12 +7,22 @@ bp = Blueprint("loading_bp", __name__, url_prefix="/")
 @bp.route("/loading", methods = ["GET"])
 def loading():
     db = database.Database()
-    select_orders = "SELECT red, blue, green, pending=1 FROM orderdb.orders"
+    select_orders = "SELECT red, blue, green FROM orders WHERE pending='3'"
     orders = db.executeAll(select_orders)
 
     # try:
-    current_orders = orders[0:3]
+    if len(orders)>0:
+        current_orders = orders[0]
 
+        current_orders_r = current_orders['red']
+        current_orders_g = current_orders['green']
+        current_orders_b = current_orders['blue']
+    else:
+
+        current_orders_r = 0#current_orders['red']
+        current_orders_g = 0#current_orders['green']
+        current_orders_b = 0
+    '''
     current_orders_r = 0
     current_orders_g = 0
     current_orders_b = 0
@@ -21,12 +31,22 @@ def loading():
         current_orders_r += current_orders[i]['red']
         current_orders_g += current_orders[i]['green']
         current_orders_b += current_orders[i]['blue']
+    '''
 
     current_orders_dict = {'red': current_orders_r, 'green': current_orders_g, 'blue': current_orders_b}
 
     # try:
-    next_orders = orders[3:6]
+    if len(orders)>1:
+        next_orders = orders[1]
 
+        next_orders_r = next_orders['red']
+        next_orders_g = next_orders['green']
+        next_orders_b = next_orders['blue']
+    else:
+        next_orders_r=0
+        next_orders_g=0
+        next_orders_b=0
+    '''
     next_orders_r = 0
     next_orders_g = 0
     next_orders_b = 0
@@ -35,6 +55,7 @@ def loading():
         next_orders_r += next_orders[i]['red']
         next_orders_g += next_orders[i]['green']
         next_orders_b += next_orders[i]['blue']
+    '''
 
     next_orders_dict = {'red': next_orders_r, 'green': next_orders_g, 'blue': next_orders_b}
    
@@ -47,46 +68,22 @@ def loading():
     inventory_b = inventory[0]['blue']
 
     inventory_dict = {'red': inventory_r, 'green': inventory_g, 'blue': inventory_b}
+    '''
+    inventory_r -= current_orders_r
+    inventory_g -= current_orders_g
+    inventory_b -= current_orders_b
 
-    inventory[0]['red'] -= current_orders_r
-    inventory[0]['green'] -= current_orders_g
-    inventory[0]['blue'] -= current_orders_b
-
-    update_inventory_r = "UPDATE orderdb.inventory SET red='%d' " % (inventory[0]['red'])
+    update_inventory_r = "UPDATE orderdb.inventory SET red='%d' " % (inventory_r)
     db.execute(update_inventory_r)
     db.commit()
-    update_inventory_g = "UPDATE orderdb.inventory SET green='%d'" % (inventory[0]['green'])
+    update_inventory_g = "UPDATE orderdb.inventory SET green='%d'" % (inventory_g)
     db.execute(update_inventory_g)
     db.commit()
-    update_inventory_b = "UPDATE orderdb.inventory SET blue='%d'" % (inventory[0]['blue'])
+    update_inventory_b = "UPDATE orderdb.inventory SET blue='%d'" % (inventory_b)
     db.execute(update_inventory_b)
     db.commit()
+    '''
     
-
-    ####inventory replenishment
-    init_r, init_g, init_b = 26, 26, 26
-    shipping_r, shipping_g, shipping_b = 0,0,0
-    sql = "SELECT red, blue, green, pending=2 FROM orderdb.orders"
-    shipping = db.executeAll(sql)
-    for i in range(len(shipping)):
-         shipping_r += shipping[i]['red']
-         shipping_g += shipping[i]['green']
-         shipping_b += shipping[i]['blue']
-    shipping_r = init_r - shipping_r 
-    shipping_g = init_g - shipping_g
-    shipping_b = init_b - shipping_b  
-   
-    sql = "UPDATE orderdb.orders  SET red='%d'" % (shipping_r)
-    db.execute(sql)
-    db.commit()
-    sql = "UPDATE orderdb.orders  SET green='%d'" % (shipping_g)
-    db.execute(sql)
-    db.commit()
-    sql = "UPDATE orderdb.orders  SET blue='%d'" % (shipping_b)
-    db.execute(sql)
-    db.commit()
-
-
 
     return render_template("/pages/loading.html",
                            title="Loading",

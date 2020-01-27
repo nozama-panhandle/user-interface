@@ -1,6 +1,12 @@
 {% extends '/pages/layout.html' %}
 
 {% block content %}
+    <h1>Loading Package</h1>
+    <style>
+    table, th, td {
+        border: 1px solid black;
+    }
+    </style>
     <script>
         var socket=io.connect('http://'+document.domain+':'+location.port);
         socket.on('connect', function(){console.log('Connected!');});
@@ -28,24 +34,42 @@
 		var package_color = ['Red', 'Green', 'Blue'];
 	</script>
 
-    <button onclick="reset()">Reset</button>
-    <button onclick="schedule()">Schedule</button>
-    <button onclick="complete()">Complete</button>
-    <button onclick="replenish()">Replenish</button>
+    <div>
+        <button onclick="schedule()">Schedule Delivery</button>
+        <button onclick="complete()">Start Delivery</button>
+        <button onclick="reset()">Reset Schedule</button>
+    </div>
 
-	<h2>Current Delivery</h2>
-    <span> Red : {{current_order.red}} </span>
-    <span> Green : {{current_order.green}} </span>
-    <span> Blue : {{current_order.blue}} </span>
+    <h2>Current Delivery</h2>
+     <table>
+	    <tr>
+	     <td bgcolor="#ff6666" width="70" align="center"><font color='white'>{{current_order.red}}</font></td>
+	     <td bgcolor="#66ff66" width="70" align="center"><font color='white'>{{current_order.green}}</font></td>
+	     <td bgcolor="#6666ff" width="70" align="center"><font color='white'>{{current_order.blue}}</font></td>
+	    </tr>
+    </table>
+
+
+
 
 	<h2>Next Delivery</h2>
-	<span> Red : {{next_order.red}} </span>
-    <span> Green : {{next_order.green}} </span>
-    <span> Blue : {{next_order.blue}} </span>
-
-	<h2>Stocks in Inventory</h2>
-    <span style="color:red"> Red : {{inventory.red}} </span>
-    <span style="color:green"> Green : {{inventory.green}} </span>
-    <span style="color:blue"> Blue : {{inventory.blue}} </span>
+	 <table>
+	    <tr>
+	     <td bgcolor="#ff6666" width="70" align="center"><font color='white'>{{next_order.red}}</font></td>
+	     <td bgcolor="#66ff66" width="70" align="center"><font color='white'>{{next_order.green}}</font></td>
+	     <td bgcolor="#6666ff" width="70" align="center"><font color='white'>{{next_order.blue}}</font></td>
+	    </tr>
+    </table>
+    <h2>Stocks in Inventory</h2>  	 
+    <table>
+	    <tr>
+	     <td bgcolor="#ff6666" width="70" align="center"><font color='white'>{{inventory.red}}</font></td>
+	     <td bgcolor="#66ff66" width="70" align="center"><font color='white'>{{inventory.green}}</font></td>
+	     <td bgcolor="#6666ff" width="70" align="center"><font color='white'>{{inventory.blue}}</font></td>
+	    </tr>
+    </table>
+    <div>
+        <button onclick="replenish()">Replenish</button>
+    </div>
 
 {% endblock %}
