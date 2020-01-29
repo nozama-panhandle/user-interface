@@ -2,12 +2,13 @@ import time
 import cv2
 import socket
 import pymysql
+import json
 
 from threading import Thread
-from flask import Flask, Response, request
+from flask import Flask, Response, request, render_template
 from flask_socketio import SocketIO
 from sys import argv
-
+from datetime import datetime
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -23,30 +24,78 @@ db=pymysql.connect(host='localhost',
                    db='orderdb')
 cursor = db.cursor(pymysql.cursors.DictCursor)
 
-if len(argv) > 1:
-    host_port = int(argv[1])
-try:
-    host_ip = socket.gethostbyname(host_name)
-except:
-    print("no host!")
-    exit(0)
+#if len(argv) > 1:
+#    host_port = int(argv[1])
+#try:
+#    host_ip = socket.gethostbyname(host_name)
+#except:
+#    print("no host!")
+#    exit(0)
 
 @socketio.on('connect')
 def on_connect():
     print('Browser is connected!')
 
+#@app.route('/robot')
+#def on_robot():
+#    return render_template("/pages/index.html")
+
+@socketio.on('message', namespace='/robot')
+def on_message(data):
+    print(data)
+    socketio.emit('arrived', '101',namespace='/unloading')
+
+@socketio.on('connect', namespace='/robot')
+def on_connect_robot():
+    print('Robot is connected!')
+
 @socketio.on('keypress')
 def on_keypress(data):
     print(data)
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print(host_ip, host_port)
-    s.connect((host_ip, host_port))
-    s.send(data.encode('ascii'))
-    s.close()
+    socketio.emit("message", data, namespace='/robot')
+#    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#    print(host_ip, host_port)
+#    s.connect((host_ip, host_port))
+#    s.send(data.encode('ascii'))
+#    s.close()
 
-@socketio.on('button')
+@socketio.on('button', namespace='/unloading')
 def on_button(data):
-    print(data)
+    print('unloading ',data)
+    com, address = data.split()
+#0: completed
+#1: pending
+#2: shipping
+#3: scheduled
+    if com == "clear":
+        now = datetime.now()
+        cursor.execute("UPDATE orders SET filldate='%s' WHERE pending='2' and address='%s'"%(now,address))
+        cursor.fetchall()
+        
+        
+        cursor.execute("UPDATE orders SET pending='0' WHERE pending='2' and address='%s'"%address)
+        db.commit()
+        ###next scheduled number
+        cursor.execute("SELECT address, red, green, blue FROM orders WHERE pending='2' order by delivery_order")
+        orders=cursor.fetchall()
+
+       
+        if len(orders)==0:
+            next_address=0
+        else:
+            next_address = orders[0]['address']
+        #if address ==next_address:
+        #    print("more package to unload")
+        #socketio.emit('refresh', orders, namespace='/unloading')
+        #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #s.connect((host_ip, host_port))
+        #s.send((com+' '+str(next_address)).encode('ascii'))
+        #s.close()
+        socketio.emit('message', com+' '+str(next_address), namespace='/robot')
+
+@socketio.on('button', namespace='/loading')
+def on_button(data):
+    print('loading '+data)
     com, address = data.split()
 #0: completed
 #1: pending
@@ -109,37 +158,27 @@ def on_button(data):
         ###complete
         #cursor.execute("UPDATE orders SET pending='2' WHERE pending='3'")
         #db.commit()
-
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((host_ip, host_port))
-        s.send((com+' '+str(next_address)).encode('ascii'))
-        s.close()
-    elif com == "clear":
-        cursor.execute("UPDATE orders SET pending='0' WHERE pending='2' and address='%s'"%address)
-        db.commit()
-        ###next scheduled number
-        cursor.execute("SELECT address FROM orders WHERE pending='2' order by delivery_order")
-        next_address=cursor.fetchall()
-
-       
-        if len(next_address)==0:
-            next_address=0
-        else:
-            next_address = next_address[0]['address']
-        #if address ==next_address:
-        #    print("more package to unload")
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((host_ip, host_port))
-        s.send((com+' '+str(next_address)).encode('ascii'))
-        s.close()
+        print("c_orders: ", c_orders)
+        socketio.emit('refresh', c_orders, namespace='/unloading')
+        inventory_dict = {'red':inventory_r,'green':inventory_g,'blue':inventory_b}
+        socketio.emit('inventory', inventory_dict,namespace='/loading')
+        
+        #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #s.connect((host_ip, host_port))
+        #s.send((com+' '+str(next_address)).encode('ascii'))
+        #s.close()
+        socketio.emit("message", com+' '+str(next_address), namespace='/robot')
     elif com == "schedule":
         cursor.execute("UPDATE orders SET pending='1' WHERE pending='3'")
         db.commit()
-        cursor.execute("SELECT id FROM orders WHERE pending='1'")
+        cursor.execute("SELECT id, address, red, green, blue FROM orders WHERE pending='1'")
         pend_list=cursor.fetchall()
         print(pend_list)
-        cursor.execute("UPDATE orders SET pending='3', delivery_order='0' WHERE id='%s'"% pend_list[0]['id'])
-        db.commit()
+        if pend_list:
+            cursor.execute("UPDATE orders SET pending='3', delivery_order='0' WHERE id='%s'"% pend_list[0]['id'])
+            db.commit()
+        socketio.emit('refresh', pend_list, namespace='/loading')
+        #socketio.emit('refresh', {'red':1, 'green':1, 'blue':1}, namespace='/loading')
     elif com =="replenish":
         ####inventory replenishment
         init_r, init_g, init_b = 26, 26, 26
@@ -161,7 +200,8 @@ def on_button(data):
         db.commit()
         cursor.execute("UPDATE inventory  SET blue='%s'" % (shipping_b))
         db.commit()
-
+        inventory_dict = {'red':shipping_r,'green':shipping_g,'blue':shipping_b}
+        socketio.emit('inventory', inventory_dict,namespace='/loading')
 #from app.modules import buttonio
 
         

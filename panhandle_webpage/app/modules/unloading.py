@@ -10,17 +10,27 @@ def unloading():
     sql = "SELECT red, blue, green, address FROM orderdb.orders WHERE pending='2'"
     selected_data = db_select.executeAll(sql)
 
-    print(len(selected_data))
+    print("Length is:", len(selected_data))
 
-    if len(selected_data) is 0:
-        current_package = [{'red':0, 'blue':0, 'green':0, 'address':0}]
-        next_package = [{'red':0, 'blue':0, 'green':0, 'address':0}]
-    elif len(selected_data) is 1:
+    if len(selected_data) == 0:
+        current_package = {'red':2, 'blue':2, 'green':2, 'address':2}
+        next_package = [{'red':7, 'blue':7, 'green':7, 'address':7}]
+    elif len(selected_data) ==  1:
         current_package = selected_data[0]
+        # current_package = [{'red':0, 'blue':0, 'green':0, 'address':0}]
         next_package = [{'red':0, 'blue':0, 'green':0, 'address':0}]
     else:
         current_package = selected_data[0]
         next_package = selected_data[1:]
+
+    print("current package:", current_package)
+
+    print("current package length:", len(current_package))
+
+    
+    print("next package:", next_package)
+
+    print("next package length:", len(next_package))
 
     return render_template("/pages/unloading.html",
                            title="Unloading",
