@@ -1,0 +1,166 @@
+{% extends '/layout.html' %}
+
+{% block content %}
+    <div class="container-fluid" style="height: 130px; border-bottom: 1px dotted #d32f2f;">
+        <div class="row" style="height: 70px;">
+            <p class="h1" style="color: #424242; height: 60px; line-height: 60px;">Operation Dashboard</p>
+        </div>
+
+        <div class="row float-right" style="height: 60px;">
+            <button id="mode_btn" type="button" class="btn" style="width: 180px; height: 50px; background-color: #bdbdbd;" onclick="select_mode()">
+                <span id="mode_text" class="align-middle font-weight-normal" style="color: #424242">Monitoring</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="container-fluid" style="height: 10px;">
+        <div class="row" style="height: 10px;"></div>
+    </div>
+
+    <div class="container-fluid" style="height: 50px;">
+        <div class="row" style="height: 500px;">
+                <img src="http://rpi-6.wifi.local.cmu.edu:8888/video_feed" alt="rasp-pi robot camera" class="rounded mx-auto d-block" width="640" height="480" style="background-color: #e0e0e0; border: 2px solid #ffc209;">
+        </div>
+    </div>
+    <!-- <div class="container-fluid" style="height: auto;">
+        <p>W: forward, A: left, D: right, S: backward</p>
+        <div class="position-relative"
+            id="Wkey" 
+            style="text-align:center;
+            font-weight:bold;
+            font-size:25px;
+            position:relative;
+            width:50px;
+            height:50px;
+            top:0px;
+            left:50px;
+            border:5px 
+            solid #000;">
+            W
+        </div>
+        <div class="position-relative" 
+            id="Akey" 
+            style="text-align:center;
+            font-weight:bold;
+            font-size:25px;
+            position:relative;
+            width:50px;
+            height:50px;
+            top:0px;
+            left:0px;
+            border:5px 
+            solid #000;">
+            A
+        </div>
+        <div class="position-relative" 
+            id="Skey" 
+            style="text-align:center;
+            font-weight:bold;
+            font-size:25px;
+            position:relative;
+            width:50px;
+            height:50px;
+            top:-50px;
+            left:50px;
+            border:5px 
+            solid #000;">
+            S
+        </div>
+        <div class="position-relative" 
+            id="Dkey" 
+            style="text-align:center;
+            font-weight:bold;
+            font-size:25px;
+            position:relative;
+            width:50px;
+            height:50px;
+            top:-100px;
+            left:100px;
+            border:5px 
+            solid #000;">
+            D
+        </div>
+    </div> -->
+<!--    <img src="http://mellon.andrew.cmu.edu:8888/video_feed" width="640" height="480"></img> -->
+    <script> 
+        var socket=io.connect('http://'+document.domain+':'+location.port+'/monitoring');
+        socket.on('connect', function(){
+            console.log('Connected!');
+        });
+//        socket.on('arrived', function(msg){
+//            alert('arrived '+msg);
+//       });
+    
+//        socket.on('refresh', function(msg){
+//            console.log(msg);       
+//            if(msg){ 
+//                l=Object.keys(msg).length
+//            }
+//            else{
+//                l=0
+//            }
+
+    $(document).keydown(function(e){
+        key=e['key']
+        socket.emit('keypress', e['key']+" d");
+        console.log(e['key']+' down')
+        switch(key){
+            case 'w':
+                document.getElementById("Wkey").style.backgroundColor="blue";
+                break;
+            case 'a':
+                document.getElementById("Akey").style.backgroundColor="blue";
+                break;
+            case 's':
+                document.getElementById("Skey").style.backgroundColor="blue";
+                break;
+            case 'd':
+                document.getElementById("Dkey").style.backgroundColor="blue";
+                break;
+        }
+    });
+    $(document).keyup(function(e){
+        key=e['key']
+        //socket.emit('keypress', e['key']+" u");
+        console.log(e['key']+' up')
+        switch(key){
+            case 'w':
+                document.getElementById("Wkey").style.backgroundColor="white";
+                break;
+            case 'a':
+                document.getElementById("Akey").style.backgroundColor="white";
+                break;
+            case 's':
+                document.getElementById("Skey").style.backgroundColor="white";
+                break;
+            case 'd':
+                document.getElementById("Dkey").style.backgroundColor="white";
+                break;
+        }
+    });
+    </script>
+    <script>
+        function listing_pages(pages) {
+            var link = new Array(pages.length);
+        }
+    </script>
+    <script>
+        function select_mode() {
+            var target_btn = document.querySelector("#mode_btn")
+            var btn_text = document.querySelector("#mode_text")
+
+            if(btn_text.innerText === "Monitoring") {
+                target_btn.style.backgroundColor = "#9a0007";
+              //  btn_text.style.color = "#ffffff";
+                btn_text.innerText = "<span id="mode_text" class="align-middle font-weight-normal" style="color: #ffffff">Maintenance</span>";
+ 
+            //elif(btn_text.innerText === "Maintenance") {
+            //else {
+              //  target_btn.style.backgroundColor = "#bdbdbd";
+               // btn_text.style.color = "#424242";
+               // btn_text.innerText = "Monitoring";
+            }
+        }
+    </script>
+
+{% endblock %}

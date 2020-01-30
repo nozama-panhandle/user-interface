@@ -1,51 +1,55 @@
-{% extends '/pages/layout.html' %}
+{% extends '/layout.html' %}
 
 {% block content %}
-    <div class="container-fluid" style="height: 80px;">
-        <div class="row">
-            <p class="h1">Unloading Package</p>
+    <div class="container-fluid" style="height: 70px; border-bottom: 1px dotted #d32f2f;">
+        <div class="row" style="height: 70px;">
+            <p class="h1" style="color: #424242; height: 60px; line-height: 60px;">Unloading Package</p>
         </div>
     </div>
 
-    <div class="container-fluid" style="height: 220px;">
-        <div class="row">
-	        <p class="h2">Current Delivery</p>
+    <div class="container-fluid" style="height: 290px; border-bottom: 1px dotted #d32f2f;">
+        <div class="row" height="height: 60px;">
+	        <p class="h2" style="color: #424242; height: 50px; line-height: 50px;">Current Delivery</p>
         </div>
-        <table class="table table-borderless" style="height: 150px; text-align: center;">
-	        <tbody>
-                <tr>
-	                <td id="curr_addr" class="w-25 align-middle bg-secondary rounded">
-                        <p class="h2 text-white">{{current_unload.address}}</p>
-                    </td>
-	                <td id="curr_red" class="w-25 align-middle bg-danger rounded">
-                        <p class="h2 text-white">{{current_unload.red}}</p>
-                    </td>
-	                <td id="curr_green" class="w-25 align-middle bg-success rounded">
-                        <p class="h2 text-white">{{current_unload.green}}</p>
-                    </td>
-	                <td id="curr_blue" class="w-25 align-middle bg-primary rounded">
-                        <p class="h2 text-white">{{current_unload.blue}}</p>
-                    </td>  
-                </tr>
-            </tbody>
-	    </table>
-        <div>
-            <button class="btn btn-block" type="button" style="background-color: #bdbdbd; border-color: #ffc209; border-width: 2px;" onclick="myFunction()">
-                <span class="align-bottom" style="color: #424242;">Package is delivered</span>
+        <div class="row" style="height: 170px;">
+            <table class="table table-borderless" style="height: 160px; text-align: center;">
+                    <tr>
+	                    <td class="align-middle bg-secondary rounded" colspan="3">
+                            <p id="curr_addr" class="h2 text-white font-weight-normal">Address # : {{current_unload.address}}</p/>
+                        </td>
+                    </tr>
+                    <tr>
+	                    <td class="w-25 align-middle bg-danger rounded">
+                            <p id="curr_red" class="h2 text-white font-weight-normal">{{current_unload.red}}</p>
+                        </td>
+	                    <td class="w-25 align-middle bg-success rounded">
+                            <p id="curr_green" class="h2 text-white font-weight-normal">{{current_unload.green}}</p>
+                        </td>
+	                    <td class="w-25 align-middle bg-primary rounded">
+                            <p id="curr_blue" class="h2 text-white fon-weight-normal">{{current_unload.blue}}</p>
+                        </td>  
+                    </tr>
+	        </table>
+        </div>
+        <div class="row" style="height: 60px;">
+            <button class="btn btn-block" type="button" style="height: 50px; background-color: #ffc209; border-color: #d32f2f; border-width: 2px;" onclick="myFunction()">
+                <span class="align-middle" style="color: #424242;">Complete this delivery</span>
             </button>
         </div>
     </div>
     
-    <div class="container-fluid" style="height: 500px;">
-        <div class="row">
-            <p class="h2">Next Delivery</p>
+    <div class="container-fluid" style="auto">
+        <div class="row" style="height: 60px;">
+            <p class="h2" style="color: #424242; height: 50px; line-height: 50px;">Next Delivery</p>
         </div>
-	    <table id="next_table" class="table table-borderless" style="height: 150px; text-align: center;">
-	        <tbody></tbody>
-	    </table>
-        <div>
-            <button type="button" class="btn btn-block" style="background-color: #bdbdbd; border-color: #ffc209; border-width: 2px;" onclick="pageReloader()">
-                <span class="align-bottom" style="color: #424242;">Reload</span>
+        <div class="row" style="height: 170px;">
+	        <table id="next_table" class="table table-borderless" style="height: 160px; text-align: center;">
+	            <tbody></tbody>
+	        </table>
+        </div>
+        <div class="row" style="height: 160px;">
+            <button type="button" class="btn btn-block" style="height: 50px; background-color: #ffc209; border-color: #d32f2f; border-width: 2px;" onclick="pageReloader()">
+                <span class="align-middle font-weight-normal" style="color: #424242;">Reload</span>
             </button>
 	    </div>
     </div>
@@ -57,8 +61,8 @@
 	            var red = {{next.red}};
 	            var green = {{next.green}};
 	            var blue = {{next.blue}};
-	            $('#next_table > tbody').append('<tr><td class="w-25 align-middle table-secondary rounded"><p class="h2 text-black-50">' + address + '</p></td><td class="w-25 align-middle table-danger rounded"><p class="h2 text-black-50">' + red + '</p></td><td class="w-25 align-middle table-success rounded"><p class="h2 text-black-50">' + green + '</p></td><td class="w-25 align-middle table-primary rounded"><p class="h2 text-black-50">' + blue + '</p></td></tr>');
-	        {% endfor %}
+	            $('#next_table > tbody').append('<tr><td class="w-25 align-middle table-secondary rounded" colspan="3"><p class="h2 text-black-50 font-weight-normal">Address # : ' + address + '</p></td></tr><tr><td class="w-25 align-middle table-danger rounded"><p class="h2 text-black-50 font-weight-normal">' + red + '</p></td><td class="w-25 align-middle table-success rounded"><p class="h2 text-black-50 font-weight-normal">' + green + '</p></td><td class="w-25 align-middle table-primary rounded"><p class="h2 text-black-50 font-weight-normal">' + blue + '</p></td></tr>');
+	        {% endfor %} 
 	    });
 	</script>
 	
@@ -68,7 +72,7 @@
             console.log('Connected!');
         });
         socket.on('arrived', function(msg){
-            alert('arrived');
+            alert('arrived '+msg);
         });
     
         socket.on('refresh', function(msg){

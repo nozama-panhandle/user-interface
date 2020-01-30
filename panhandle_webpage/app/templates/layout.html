@@ -4,6 +4,7 @@
 <head>
    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
    <!--  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}"> -->
+   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
    {% if title %}
      <title>Panhandle - {{ title }}</title>
    {% else %}
@@ -14,11 +15,12 @@
    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
-    {% if index %}
+    {% if login == True %}
     <script>
-        password = prompt("Welcome to Panhandle's maintenance page. Please insert your password.");
+        password = prompt("Welcome to Panhandle's admin page. Please insert your password.");
         if(password == "panhandlers") {
             alert("Access is approved.");
+            location.href = "/main"
         }
         else {
             alert("Wrong password. Please insert your password correctly.");
@@ -33,14 +35,16 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
 
     <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #9a0007;">
-        <a class="navbar-brand font-weight-bold" style="color: #ffc209"  href="#">Nozama Panhandle</a>
+        <a class="navbar-brand font-weight-normal" style="color: #ffc209"  href="/main">
+            Nozama Panhandle
+        </a>
         <div class="navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <script>
-                    var page_list = ['Loading', 'Unloading', 'Maintenance'];
+                    var page_list = ['Loading', 'Unloading', 'Dashboard'];
                     var page_idx = 0;
                     while(page_idx < page_list.length) {
-                        document.write('<li class="nav-iteme"><a class="nav-link text-white" href="/' + page_list[page_idx].toLowerCase() + '">' + page_list[page_idx] + '</a></li>');
+                        document.write('<li class="nav-iteme"><a class="nav-link text-white font-weight-light" href="/' + page_list[page_idx].toLowerCase() + '">' + page_list[page_idx] + '</a></li>');
                         page_idx = page_idx + 1;
                     }
                 </script>

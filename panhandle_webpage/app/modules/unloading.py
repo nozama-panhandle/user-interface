@@ -13,8 +13,8 @@ def unloading():
     print("Length is:", len(selected_data))
 
     if len(selected_data) == 0:
-        current_package = {'red':2, 'blue':2, 'green':2, 'address':2}
-        next_package = [{'red':7, 'blue':7, 'green':7, 'address':7}]
+        current_package = {'red':0, 'blue':0, 'green':0, 'address':0}
+        next_package = [{'red':0, 'blue':0, 'green':0, 'address':0}]
     elif len(selected_data) ==  1:
         current_package = selected_data[0]
         # current_package = [{'red':0, 'blue':0, 'green':0, 'address':0}]

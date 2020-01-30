@@ -3,8 +3,8 @@ from flask import current_app as app
 
 bp = Blueprint("index_bp", __name__, url_prefix="/")
 
-@bp.route("/", methods = ["GET"])
+@bp.route("/main", methods = ["GET"])
 def index():
     return render_template("/pages/index.html", 
-                           title="Login",
+                           title="Main",
                            index=True)

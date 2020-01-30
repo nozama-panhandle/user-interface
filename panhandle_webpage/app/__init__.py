@@ -22,19 +22,20 @@ db=pymysql.connect(host='localhost',
                    user='strong',
                    password='strong',
                    db='orderdb')
-cursor = db.cursor(pymysql.cursors.DictCursor)
 
-#if len(argv) > 1:
-#    host_port = int(argv[1])
-#try:
-#    host_ip = socket.gethostbyname(host_name)
-#except:
-#    print("no host!")
-#    exit(0)
-
-@socketio.on('connect')
+@socketio.on('connect', namespace='/loading')
 def on_connect():
-    print('Browser is connected!')
+    print('Loading page is connected!')
+
+@socketio.on('connect', namespace='/unloading')
+def on_connect():
+    print('Unloading page is connected!')
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("SELECT address, red, blue, green FROM orders WHERE pending='2'")
+    c_orders = cursor.fetchall()
+    socketio.emit('refresh', c_orders, namespace='/unloading')
+    cursor.close()
+
 
 #@app.route('/robot')
 #def on_robot():
@@ -43,7 +44,11 @@ def on_connect():
 @socketio.on('message', namespace='/robot')
 def on_message(data):
     print(data)
-    socketio.emit('arrived', '101',namespace='/unloading')
+    addr = data.split()[1]
+    if addr=='0':
+        socketio.emit('arrived', data.split()[1],namespace='/loading')
+    else:
+        socketio.emit('arrived', data.split()[1],namespace='/unloading')
 
 @socketio.on('connect', namespace='/robot')
 def on_connect_robot():
@@ -53,11 +58,6 @@ def on_connect_robot():
 def on_keypress(data):
     print(data)
     socketio.emit("message", data, namespace='/robot')
-#    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#    print(host_ip, host_port)
-#    s.connect((host_ip, host_port))
-#    s.send(data.encode('ascii'))
-#    s.close()
 
 @socketio.on('button', namespace='/unloading')
 def on_button(data):
@@ -67,6 +67,7 @@ def on_button(data):
 #1: pending
 #2: shipping
 #3: scheduled
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     if com == "clear":
         now = datetime.now()
         cursor.execute("UPDATE orders SET filldate='%s' WHERE pending='2' and address='%s'"%(now,address))
@@ -86,12 +87,8 @@ def on_button(data):
             next_address = orders[0]['address']
         #if address ==next_address:
         #    print("more package to unload")
-        #socketio.emit('refresh', orders, namespace='/unloading')
-        #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #s.connect((host_ip, host_port))
-        #s.send((com+' '+str(next_address)).encode('ascii'))
-        #s.close()
         socketio.emit('message', com+' '+str(next_address), namespace='/robot')
+    cursor.close()
 
 @socketio.on('button', namespace='/loading')
 def on_button(data):
@@ -101,6 +98,7 @@ def on_button(data):
 #1: pending
 #2: shipping
 #3: scheduled
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     if com =="reset":
         cursor.execute("UPDATE orders SET pending='1' WHERE pending='2'")
         db.commit()
@@ -163,10 +161,6 @@ def on_button(data):
         inventory_dict = {'red':inventory_r,'green':inventory_g,'blue':inventory_b}
         socketio.emit('inventory', inventory_dict,namespace='/loading')
         
-        #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #s.connect((host_ip, host_port))
-        #s.send((com+' '+str(next_address)).encode('ascii'))
-        #s.close()
         socketio.emit("message", com+' '+str(next_address), namespace='/robot')
     elif com == "schedule":
         cursor.execute("UPDATE orders SET pending='1' WHERE pending='3'")
@@ -202,14 +196,17 @@ def on_button(data):
         db.commit()
         inventory_dict = {'red':shipping_r,'green':shipping_g,'blue':shipping_b}
         socketio.emit('inventory', inventory_dict,namespace='/loading')
+    cursor.close()
 #from app.modules import buttonio
 
         
 
-from app.modules import index, loading, unloading, maintenance
+from app.modules import index, login, loading, unloading, monitoring, board
 
 app.register_blueprint(index.bp)
+app.register_blueprint(login.bp)
 app.register_blueprint(loading.bp)
 app.register_blueprint(unloading.bp)
-app.register_blueprint(maintenance.bp)
+app.register_blueprint(monitoring.bp)
+app.register_blueprint(board.bp)
 
