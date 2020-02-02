@@ -2,13 +2,14 @@ import time
 import cv2
 import socket
 import pymysql
-import json
-
+import time
 from threading import Thread
 from flask import Flask, Response, request, render_template
 from flask_socketio import SocketIO
 from sys import argv
 from datetime import datetime
+from app.modules import schedule
+
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -26,6 +27,27 @@ db=pymysql.connect(host='localhost',
 @socketio.on('connect', namespace='/loading')
 def on_connect():
     print('Loading page is connected!')
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("SELECT address, red, blue, green FROM orders WHERE pending='3'")
+    orders = cursor.fetchall()
+    ### Sum all number of r,g,b blocks
+    red_b =0
+    green_b =0
+    blue_b =0
+    c_orders={}
+    for order in orders:
+         red_b += order['red']
+         green_b += order['green']
+         blue_b += order['blue']
+    c_orders['red'] = red_b
+    c_orders['green'] = green_b
+    c_orders['blue'] = blue_b
+    socketio.emit('refresh', c_orders, namespace='/loading')
+    cursor.execute("SELECT red, blue, green FROM inventory")
+    inventory = cursor.fetchall()
+    socketio.emit('inventory', inventory[0], namespace='/loading')
+    cursor.close()
+
 
 @socketio.on('connect', namespace='/unloading')
 def on_connect():
@@ -36,10 +58,30 @@ def on_connect():
     socketio.emit('refresh', c_orders, namespace='/unloading')
     cursor.close()
 
+maint=0
+@socketio.on('connect', namespace='/monitoring')
+def on_connect():
+    global maint
 
-#@app.route('/robot')
-#def on_robot():
-#    return render_template("/pages/index.html")
+    maint = 0
+    print('Monitoring page is connected!')
+    socketio.emit('refresh', maint, namespace='/monitoring')
+
+@socketio.on('maintenance', namespace='/monitoring')
+def on_Maintenance(data):
+    global maint
+    print(data)
+    if data==0:
+        maint=0
+        print("monitoring!")
+        socketio.emit('refresh', 0, namespace='/monitoring')
+        socketio.emit('maintenance', 0, namespace='/robot')
+    else:
+        maint=1
+        print("maintenance!")
+        socketio.emit('refresh', 1, namespace='/monitoring')
+        socketio.emit('maintenance', 1, namespace='/robot')
+
 
 @socketio.on('message', namespace='/robot')
 def on_message(data):
@@ -71,11 +113,12 @@ def on_button(data):
     if com == "clear":
         now = datetime.now()
         cursor.execute("UPDATE orders SET filldate='%s' WHERE pending='2' and address='%s'"%(now,address))
-        cursor.fetchall()
-        
-        
+        db.commit()
+        cursor.execute("UPDATE orders SET delivery_order=NULL WHERE pending='2' and address='%s'"%address)
+        db.commit()
         cursor.execute("UPDATE orders SET pending='0' WHERE pending='2' and address='%s'"%address)
         db.commit()
+
         ###next scheduled number
         cursor.execute("SELECT address, red, green, blue FROM orders WHERE pending='2' order by delivery_order")
         orders=cursor.fetchall()
@@ -102,6 +145,11 @@ def on_button(data):
     if com =="reset":
         cursor.execute("UPDATE orders SET pending='1' WHERE pending='2'")
         db.commit()
+        #cursor.execute("SELECT id, address, red, green, blue FROM orders WHERE pending='1'")
+        #pend_list=cursor.fetchall()
+        #print(type(pend_list))
+        socketio.emit('refresh', (), namespace='/loading')
+
     elif com == "complete":
         cursor.execute("UPDATE orders SET pending='2' WHERE pending='3'")
         db.commit()
@@ -111,7 +159,7 @@ def on_button(data):
         cursor.execute("SELECT address, red, blue, green FROM orders WHERE pending='2'")
 
         c_orders = cursor.fetchall()
-        print("c_orders : ",c_orders)
+        #print("c_orders : ",c_orders)
         if len(c_orders)==0:
             next_address = 0
         else:
@@ -163,16 +211,21 @@ def on_button(data):
         
         socketio.emit("message", com+' '+str(next_address), namespace='/robot')
     elif com == "schedule":
+        cursor.execute("UPDATE orders SET delivery_order=NULL WHERE pending='3'")
+        db.commit()
         cursor.execute("UPDATE orders SET pending='1' WHERE pending='3'")
         db.commit()
         cursor.execute("SELECT id, address, red, green, blue FROM orders WHERE pending='1'")
         pend_list=cursor.fetchall()
-        print(pend_list)
-        if pend_list:
-            cursor.execute("UPDATE orders SET pending='3', delivery_order='0' WHERE id='%s'"% pend_list[0]['id'])
-            db.commit()
+
+        ###schedule
+        schedule.schedule(pend_list,cursor, db, max_cap=50)
+        cursor.execute("SELECT id, address, red, green, blue FROM orders WHERE pending='3'")
+        #cursor.execute("SELECT id, address, red, green, blue, pending FROM orders")
+        pend_list = cursor.fetchall()
+        print("scheduling list: ", pend_list)
+
         socketio.emit('refresh', pend_list, namespace='/loading')
-        #socketio.emit('refresh', {'red':1, 'green':1, 'blue':1}, namespace='/loading')
     elif com =="replenish":
         ####inventory replenishment
         init_r, init_g, init_b = 26, 26, 26
@@ -201,12 +254,11 @@ def on_button(data):
 
         
 
-from app.modules import index, login, loading, unloading, monitoring, board
+from app.modules import index, login, loading, unloading, monitoring
 
 app.register_blueprint(index.bp)
 app.register_blueprint(login.bp)
 app.register_blueprint(loading.bp)
 app.register_blueprint(unloading.bp)
 app.register_blueprint(monitoring.bp)
-app.register_blueprint(board.bp)
 

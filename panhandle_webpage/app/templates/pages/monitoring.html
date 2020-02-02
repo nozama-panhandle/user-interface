@@ -5,11 +5,17 @@
         <div class="row" style="height: 70px;">
             <p class="h1" style="color: #424242; height: 60px; line-height: 60px;">Operation Dashboard</p>
         </div>
-
-        <div class="row float-right" style="height: 60px;">
-            <button id="mode_btn" type="button" class="btn" style="width: 180px; height: 50px; background-color: #bdbdbd;" onclick="select_mode()">
-                <span id="mode_text" class="align-middle font-weight-normal" style="color: #424242">Monitoring</span>
-            </button>
+        <div class="row" class="height: 60px; margin: 0px -15px 10px; background-color: #9a0007">
+            <div class="col-6" style="height: 50px;">    
+                <button id="monitoring" type="button" class="btn btn-danger" style="float: left; width:180px; height:50px;" checked>
+                    <span class="align-middle font-weight-normal" style="color: #ffffff">Monitoring</span>
+                </button>
+            </div>
+            <div class="col-6" style="height: 50px;">    
+                <button id="maintenance" type="button" class="btn btn-secondary" style="float: right; width:180px; height:50px;">
+                    <span class="align-middle font-weight-normal" style="color: #424242">Maintenance</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -22,88 +28,61 @@
                 <img src="http://rpi-6.wifi.local.cmu.edu:8888/video_feed" alt="rasp-pi robot camera" class="rounded mx-auto d-block" width="640" height="480" style="background-color: #e0e0e0; border: 2px solid #ffc209;">
         </div>
     </div>
-    <!-- <div class="container-fluid" style="height: auto;">
-        <p>W: forward, A: left, D: right, S: backward</p>
-        <div class="position-relative"
-            id="Wkey" 
-            style="text-align:center;
-            font-weight:bold;
-            font-size:25px;
-            position:relative;
-            width:50px;
-            height:50px;
-            top:0px;
-            left:50px;
-            border:5px 
-            solid #000;">
-            W
-        </div>
-        <div class="position-relative" 
-            id="Akey" 
-            style="text-align:center;
-            font-weight:bold;
-            font-size:25px;
-            position:relative;
-            width:50px;
-            height:50px;
-            top:0px;
-            left:0px;
-            border:5px 
-            solid #000;">
-            A
-        </div>
-        <div class="position-relative" 
-            id="Skey" 
-            style="text-align:center;
-            font-weight:bold;
-            font-size:25px;
-            position:relative;
-            width:50px;
-            height:50px;
-            top:-50px;
-            left:50px;
-            border:5px 
-            solid #000;">
-            S
-        </div>
-        <div class="position-relative" 
-            id="Dkey" 
-            style="text-align:center;
-            font-weight:bold;
-            font-size:25px;
-            position:relative;
-            width:50px;
-            height:50px;
-            top:-100px;
-            left:100px;
-            border:5px 
-            solid #000;">
-            D
-        </div>
-    </div> -->
-<!--    <img src="http://mellon.andrew.cmu.edu:8888/video_feed" width="640" height="480"></img> -->
+
     <script> 
         var socket=io.connect('http://'+document.domain+':'+location.port+'/monitoring');
         socket.on('connect', function(){
             console.log('Connected!');
         });
-//        socket.on('arrived', function(msg){
-//            alert('arrived '+msg);
-//       });
+        socket.on('refresh', function(msg){
+            p_maintenance = $('#maintenance').parent();
+            c_maintenance = $('#maintenance').children();
+            //p_maintenance = $('#maintenance').parent().get(0);
+            p_monitoring = $('#monitoring').parent();
+            c_monitoring = $('#monitoring').children();
+            //p_monitoring = $('#monitoring').parent().get(0);
+            
+            console.log(msg);
+            
+            if(msg == 0){
+                //$('#maintenance').prop("checked",false);
+                $('#maintenance').prop("checked", false);
+                //$('#monitoring').prop("checked",true);
+                $('#monitoring').prop("checked", true);
+               // p_maintenance.removeClass("active focus btn-success");
+                $('#maintenance').removeClass("btn-danger");
+                $('#maintenance').addClass("btn-secondary")
+               c_maintenance.css("color", "#424242")
+               // $("#maintenance").focusout();
+                p_maintenance.focusout();
+               // p_monitoring.addClass("active btn-secondary");
+                $('#monitoring').removeClass("btn-secondary")
+                $('#monitoring').addClass("btn-danger");
+                c_monitoring.css("color", "#ffffff")
+            }
+            else {
+                //$('#maintenance').prop("checked", true);
+                $('#maintenance').prop("checked", true);
+                //$('#monitoring').prop("checked", false);
+                $('#monitoring').prop("checked", false);
+                // p_monitoring.removeClass("active focus btn-danger");
+                $('#monitoring').removeClass("btn-danger");
+                $('#monitoring').addClass("btn-secondary");
+                c_monitoring.css("color", "#424242")
+                //$("#monitoring").focusout();
+                p_monitoring.focusout();
+                // p_maintenance.addClass("active btn-secondary");
+                $('#maintenance').removeClass("btn-secondary")
+                $('#maintenance').addClass("btn-danger");
+                c_maintenance.css("color", "#ffffff")
+            }
+       });
     
-//        socket.on('refresh', function(msg){
-//            console.log(msg);       
-//            if(msg){ 
-//                l=Object.keys(msg).length
-//            }
-//            else{
-//                l=0
-//            }
 
     $(document).keydown(function(e){
         key=e['key']
         socket.emit('keypress', e['key']+" d");
-        console.log(e['key']+' down')
+        //console.log(e['key']+' down')
         switch(key){
             case 'w':
                 document.getElementById("Wkey").style.backgroundColor="blue";
@@ -138,28 +117,21 @@
                 break;
         }
     });
+
+    $("#monitoring").click(function(){
+        $("#monitoring").focusout();
+        socket.emit('maintenance', 0);
+    });
+    
+    $("#maintenance").click(function(){
+        $("#maintenance").focusout();
+        socket.emit('maintenance', 1);
+    });
+    
     </script>
     <script>
         function listing_pages(pages) {
             var link = new Array(pages.length);
-        }
-    </script>
-    <script>
-        function select_mode() {
-            var target_btn = document.querySelector("#mode_btn")
-            var btn_text = document.querySelector("#mode_text")
-
-            if(btn_text.innerText === "Monitoring") {
-                target_btn.style.backgroundColor = "#9a0007";
-              //  btn_text.style.color = "#ffffff";
-                btn_text.innerText = "<span id="mode_text" class="align-middle font-weight-normal" style="color: #ffffff">Maintenance</span>";
- 
-            //elif(btn_text.innerText === "Maintenance") {
-            //else {
-              //  target_btn.style.backgroundColor = "#bdbdbd";
-               // btn_text.style.color = "#424242";
-               // btn_text.innerText = "Monitoring";
-            }
         }
     </script>
 

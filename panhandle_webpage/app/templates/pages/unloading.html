@@ -7,107 +7,89 @@
         </div>
     </div>
 
-    <div class="container-fluid" style="height: 290px; border-bottom: 1px dotted #d32f2f;">
-        <div class="row" height="height: 60px;">
-	        <p class="h2" style="color: #424242; height: 50px; line-height: 50px;">Current Delivery</p>
+    <div class="container-fluid" style="height: 250px; border-bottom: 1px dotted #d32f2f;">
+        <div class="row" height="height: 70px;">
+            <div class="col-7" style="height: 50px; margin: 10px 0px;">
+	            <p class="h2" style="color: #424242; height: 50px; line-height: 50px;">Current Delivery</p>
+            </div>
+            <div class="col-5" style="height: 50px; margin: 10px 0px;">                
+                <button class="btn btn-warning" type="button" style="float: right; height: 50px; width: 250px;" onclick="myFunction()">
+                    <span class="align-middle" style="color: #424242;">Complete this delivery</span>
+                </button>
+            </div>
         </div>
-        <div class="row" style="height: 170px;">
+        <div class="row" style="height: 170px; margin: 0px 0px 10px;">
             <table class="table table-borderless" style="height: 160px; text-align: center;">
                     <tr>
 	                    <td class="align-middle bg-secondary rounded" colspan="3">
-                            <p id="curr_addr" class="h2 text-white font-weight-normal">Address # : {{current_unload.address}}</p/>
+                            <p id="curr_addr" class="h2 text-white font-weight-normal"></p/>
                         </td>
                     </tr>
                     <tr>
 	                    <td class="w-25 align-middle bg-danger rounded">
-                            <p id="curr_red" class="h2 text-white font-weight-normal">{{current_unload.red}}</p>
+                            <p id="curr_red" class="h2 text-white font-weight-normal"></p>
                         </td>
 	                    <td class="w-25 align-middle bg-success rounded">
-                            <p id="curr_green" class="h2 text-white font-weight-normal">{{current_unload.green}}</p>
+                            <p id="curr_green" class="h2 text-white font-weight-normal"></p>
                         </td>
 	                    <td class="w-25 align-middle bg-primary rounded">
-                            <p id="curr_blue" class="h2 text-white fon-weight-normal">{{current_unload.blue}}</p>
+                            <p id="curr_blue" class="h2 text-white fon-weight-normal"></p>
                         </td>  
                     </tr>
 	        </table>
         </div>
-        <div class="row" style="height: 60px;">
-            <button class="btn btn-block" type="button" style="height: 50px; background-color: #ffc209; border-color: #d32f2f; border-width: 2px;" onclick="myFunction()">
-                <span class="align-middle" style="color: #424242;">Complete this delivery</span>
-            </button>
-        </div>
     </div>
     
-    <div class="container-fluid" style="auto">
-        <div class="row" style="height: 60px;">
+    <div class="container-fluid">
+        <div class="row" style="height: 70px; margin: 10px 0px 0px;">
             <p class="h2" style="color: #424242; height: 50px; line-height: 50px;">Next Delivery</p>
         </div>
-        <div class="row" style="height: 170px;">
+        <div class="row" style="height: 170px; margin: 0px 0px 10px;">
 	        <table id="next_table" class="table table-borderless" style="height: 160px; text-align: center;">
 	            <tbody></tbody>
 	        </table>
         </div>
-        <div class="row" style="height: 160px;">
-            <button type="button" class="btn btn-block" style="height: 50px; background-color: #ffc209; border-color: #d32f2f; border-width: 2px;" onclick="pageReloader()">
-                <span class="align-middle font-weight-normal" style="color: #424242;">Reload</span>
-            </button>
-	    </div>
     </div>
 
-	<script type="text/javascript">
-	    $(function() {
-	        {% for next in next_unload %}
-	            var address = {{next.address}};
-	            var red = {{next.red}};
-	            var green = {{next.green}};
-	            var blue = {{next.blue}};
-	            $('#next_table > tbody').append('<tr><td class="w-25 align-middle table-secondary rounded" colspan="3"><p class="h2 text-black-50 font-weight-normal">Address # : ' + address + '</p></td></tr><tr><td class="w-25 align-middle table-danger rounded"><p class="h2 text-black-50 font-weight-normal">' + red + '</p></td><td class="w-25 align-middle table-success rounded"><p class="h2 text-black-50 font-weight-normal">' + green + '</p></td><td class="w-25 align-middle table-primary rounded"><p class="h2 text-black-50 font-weight-normal">' + blue + '</p></td></tr>');
-	        {% endfor %} 
-	    });
-	</script>
-	
 	<script>
         var socket=io.connect('http://'+document.domain+':'+location.port+'/unloading');
+
         socket.on('connect', function(){
             console.log('Connected!');
         });
+        
         socket.on('arrived', function(msg){
-            alert('arrived '+msg);
+            alert('Package has arrived at ' + msg);
         });
-    
+         
         socket.on('refresh', function(msg){
             console.log(msg);
-            //$("#curr_addr").text(msg[0]['addr']);
-       
+            $("#curr_addr").text("Address # -");
+            $("#curr_red").text("0");
+            $("#curr_green").text("0");
+            $("#curr_blue").text("0");
+            l = 0
             if(msg){
-                $("#curr_addr").text(msg[0]['address']);
+                $("#curr_addr").text("Address # "+ msg[0]['address']);
                 $("#curr_red").text(msg[0]['red']);
                 $("#curr_green").text(msg[0]['green']);
                 $("#curr_blue").text(msg[0]['blue']);
                 l=Object.keys(msg).length
             }
-            else{
-                $("#curr_addr").text("");
-                $("#curr_red").text("");
-                $("#curr_green").text("");
-                $("#curr_blue").text("");
-                l=0
-            }
-       
             $('#next_table > tbody').html("")
             for(i=1;i<l;i++){
-                $('#next_table > tbody').append('<tr><td>' + msg[i]['address'] + '</td><td>' + msg[i]['red'] + '</td><td>' + msg[i]['green'] + '</td><td>' + msg[i]['blue'] + '</td></tr>');
+                $('#next_table > tbody').append('<tr><td class="w-25 align-middle table-secondary rounded"><p class="h2 text-black-50 font-weight-normal">' + msg[i]['address'] + '</p></td><td class="w-25 align-middle table-danger rounded"><p class="h2 text-black-50 font-weight-normal">' + msg[i]['red'] + '</p></td><td class="w-25 align-middle table-success rounded"><p class="h2 text-black-50 font-weight-normal">' + msg[i]['green'] + '</p></td><td class="w-25 align-middle table-primary rounded"><p class="h2 text-black-50 font-weight-normal">' + msg[i]['blue'] + '</p></td></tr>');
             }
         });
 
 	    function myFunction() {
-		    socket.emit('button', 'clear ' + $("#curr_addr").text());
-	    }
-
-        function pageReloader() {
-            if(!alert('{{current_unload.address}} arrived!')){
-                window.location.reload();
+            if($("#curr_addr").text().substring(10) == "-") {
+                socket.emit('button', 'clear ' + '0');
             }
+            else {    
+		        socket.emit('button', 'clear ' + $("#curr_addr").text().substring(10));
+	        }
         }
+
 	</script>
 {% endblock %}

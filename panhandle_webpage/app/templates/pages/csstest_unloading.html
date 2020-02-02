@@ -1,0 +1,86 @@
+{% extends '/layout.html' %}
+
+{% block content %}
+    <div class="container-fluid container-topic divide-content">
+        <div class="row row-topic">
+            <p class="h1 h1-topic">Unloading Package</p>
+        </div>
+    </div>
+
+    <div class="container-fluid container-content divide-content">
+        <div class="row row-content-topic">
+	        <p class="h2 h2-content-topic">Current Delivery</p>
+        </div>
+        <div class="row row-content-table-unload">
+            <table class="table table-borderless table-content-unload" style="text-align: center;">
+                    <tr>
+	                    <td class="align-middle bg-secondary rounded" colspan="3">
+                            <p id="curr_addr" class="h2 text-white font-weight-normal">Address # : </p/>
+                        </td>
+                    </tr>
+                    <tr>
+	                    <td class="w-25 align-middle bg-danger rounded">
+                            <p id="curr_red" class="h2 text-white font-weight-normal"></p>
+                        </td>
+	                    <td class="w-25 align-middle bg-success rounded">
+                            <p id="curr_green" class="h2 text-white font-weight-normal"></p>
+                        </td>
+	                    <td class="w-25 align-middle bg-primary rounded">
+                            <p id="curr_blue" class="h2 text-white font-weight-normal"></p>
+                        </td>  
+                    </tr>
+	        </table>
+        </div>
+        <div class="row row-content-btn">
+            <button class="btn btn-block btn-content" type="button" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="myFunction()">
+                <span class="align-middle" style="color: #424242;">Complete this delivery</span>
+            </button>
+        </div>
+    </div>
+    
+    <div class="container-fluid" style="auto">
+        <div class="row row-content-topic">
+            <p class="h2 h2-content-topic">Next Delivery</p>
+        </div>
+        <div class="row row-content-table-unload">
+	        <table id="next_table" class="table table-borderless table-content-unload" style="text-align: center;">
+	            <tbody></tbody>
+	        </table>
+        </div>
+    </div>
+
+	<script>
+        var socket=io.connect('http://'+document.domain+':'+location.port+'/unloading');
+        socket.on('connect', function(){
+            console.log('Connected!');
+        });
+        socket.on('arrived', function(msg){
+            alert('arrived '+msg);
+        });
+    
+        socket.on('refresh', function(msg){
+            console.log(msg);
+            $("#curr_addr").text("Address # -");
+            $("#curr_red").text("0");
+            $("#curr_green").text("0");
+            $("#curr_blue").text("0");
+            l = 0
+            if(msg){
+                $("#curr_addr").text("Address # "+ msg[0]['address']);
+                $("#curr_red").text(msg[0]['red']);
+                $("#curr_green").text(msg[0]['green']);
+                $("#curr_blue").text(msg[0]['blue']);
+                l=Object.keys(msg).length
+            }
+            $('#next_table > tbody').html("")
+            for(i=1;i<l;i++){
+                $('#next_table > tbody').append('<tr><td class="w-25"> align-middle table-secondary rounded" colspan="3"><p class="h2 text-black-50 font-weight-normal">Address # : ' + msg[i]['address'] + '</p></td></tr><tr><td class="w-25 align-middle table-danger rounded"><p class="h2 text-black-50 font-weight-normal">' + msg[i]['red'] + '</p></td><td class="w-25 align-middle table-success rounded"><p class="h2 text-black-50 font-weight-normal">' + msg[i]['green'] + '</p></td><td class="w-25 align-middle table-primary rounded"><p class="h2 text-black-50 font-weight-normal">' + msg[i]['blue'] + '</p></td></tr>');
+            }
+        });
+
+	    function myFunction() {
+		    socket.emit('button', 'clear ' + $("#curr_addr").text());
+	    }
+
+	</script>
+{% endblock %}
