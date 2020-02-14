@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.*;
-public class random_ordersUI
+public class random_OrdersUI
 {
 	public static void main(String args[])
 	{
@@ -54,7 +54,7 @@ public class random_ordersUI
 		DateTimeFormatter dtf = null;				// Date object formatter
 		LocalDate localDate = null;					// Date object
 		WSClientAPI api = new WSClientAPI();		// RESTful api object
-        int max_item=10;
+        int max_item=15;
         float max_time=20;
         float min_time=1;
 

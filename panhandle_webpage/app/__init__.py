@@ -8,40 +8,39 @@ from flask import Flask, Response, request, render_template
 from flask_socketio import SocketIO
 from sys import argv
 from datetime import datetime
-from app.modules import schedule
+from datetime import MINYEAR
+from app.modules import rgbschedule as schedule
+#from app.modules import newschedule as schedule
+#from app.modules import schedule as schedule
+from collections import Counter
 
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 
+
 is_streaming = False
-port = 8888
-frame_rate = 30
-host_name = "rpi-6.wifi.local.cmu.edu"
-host_port = 7777
+
 db=pymysql.connect(host='localhost',
                    user='strong',
                    password='strong',
                    db='orderdb')
 
+schedule_time=datetime.now()
+begin_time=datetime.now()
+end_time=datetime.now()
+
+inStop= True
+robotConn = False
+
 @socketio.on('connect', namespace='/loading')
 def on_connect():
     print('Loading page is connected!')
     cursor = db.cursor(pymysql.cursors.DictCursor)
-    cursor.execute("SELECT address, red, blue, green FROM orders WHERE pending='3'")
+    cursor.execute("SELECT address, red, blue, green FROM scheduling WHERE pending='3'")
     orders = cursor.fetchall()
     ### Sum all number of r,g,b blocks
-    red_b =0
-    green_b =0
-    blue_b =0
-    c_orders={}
-    for order in orders:
-         red_b += order['red']
-         green_b += order['green']
-         blue_b += order['blue']
-    c_orders['red'] = red_b
-    c_orders['green'] = green_b
-    c_orders['blue'] = blue_b
+    c_orders=sum(map(Counter, orders), Counter())
     socketio.emit('refresh', c_orders, namespace='/loading')
     cursor.execute("SELECT red, blue, green FROM inventory")
     inventory = cursor.fetchall()
@@ -53,7 +52,7 @@ def on_connect():
 def on_connect():
     print('Unloading page is connected!')
     cursor = db.cursor(pymysql.cursors.DictCursor)
-    cursor.execute("SELECT address, red, blue, green FROM orders WHERE pending='2'")
+    cursor.execute("SELECT address, cast(sum(red) as unsigned) red, cast(sum(green) as unsigned) green, cast(sum(blue) as unsigned) blue FROM scheduling WHERE pending='2' group by address order by delivery_order")
     c_orders = cursor.fetchall()
     socketio.emit('refresh', c_orders, namespace='/unloading')
     cursor.close()
@@ -62,17 +61,43 @@ maint=0
 @socketio.on('connect', namespace='/monitoring')
 def on_connect():
     global maint
-
-    maint = 0
     print('Monitoring page is connected!')
     socketio.emit('refresh', maint, namespace='/monitoring')
 
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("SELECT red, blue, green FROM inventory")
+    inventory = cursor.fetchall()
+    socketio.emit('inventory', inventory[0], namespace='/monitoring')
+    
+    #cursor.execute("SELECT id FROM orders")
+    #whole_orders = cursor.fetchall()
+    #cursor.execute("SELECT id FROM orders WHERE pending='0'")
+    #completed_orders = cursor.fetchall()
+    #progress = (len(completed_orders) / len(whole_orders))
+    #socketio.emit('progress', progress, namespace='/monitoring')
+
+    cursor.close()
+
+@socketio.on('disconnect', namespace='/robot')
+def on_disconnect():
+    print("The robot is disconnected!")
+    global robotConn
+    robotConn=False
+
+@socketio.on('connect', namespace='/robot')
+def on_connect():
+    global maint, robotConn
+    robotConn=True
+    print('The robot is connected!', robotConn)
+    socketio.emit('maintenance', maint, namespace='/robot')
+
 @socketio.on('maintenance', namespace='/monitoring')
 def on_Maintenance(data):
-    global maint
+    global maint, inStop
     print(data)
     if data==0:
         maint=0
+        inStop=True
         print("monitoring!")
         socketio.emit('refresh', 0, namespace='/monitoring')
         socketio.emit('maintenance', 0, namespace='/robot')
@@ -82,27 +107,63 @@ def on_Maintenance(data):
         socketio.emit('refresh', 1, namespace='/monitoring')
         socketio.emit('maintenance', 1, namespace='/robot')
 
+@socketio.on('maintenance', namespace='/robot')
+def on_MaintenanceRobot(data):
+    global maint
+    print(data)
+    if data==0:
+        maint=0
+        print("monitoring!")
+        socketio.emit('refresh', 0, namespace='/monitoring')
+    else:
+        maint=1
+        print("maintenance!")
+        socketio.emit('refresh', 1, namespace='/monitoring')
+'''
+@socketio.on('progress', namespace='/monitoring')
+def order_progress(data):
+    print(data)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
 
+    cursor.execute("SELECT id FROM orders")
+    whole_orders = cursor.fetchall()
+
+    cursor.execute("SELECT id FROM orders WHERE pending='0'")
+    completed_orders = cursor.fetchall()
+
+    progress = (len(completed_orders) / len(whole_orders))
+    
+    socketio.emit('progress', progress, namespace='/monitoring')
+    cursor.close()
+'''
 @socketio.on('message', namespace='/robot')
 def on_message(data):
+    global schedule_time, begin_time, end_time
+    global inStop
     print(data)
     addr = data.split()[1]
+    print(type(addr), " ",addr)
+    begin_time=datetime.now()
+    inStop = True
     if addr=='0':
         socketio.emit('arrived', data.split()[1],namespace='/loading')
     else:
         socketio.emit('arrived', data.split()[1],namespace='/unloading')
 
-@socketio.on('connect', namespace='/robot')
-def on_connect_robot():
-    print('Robot is connected!')
+#@socketio.on('connect', namespace='/robot')
+#def on_connect_robot():
+#    print('Robot is connected!')
 
 @socketio.on('keypress')
 def on_keypress(data):
     print(data)
     socketio.emit("message", data, namespace='/robot')
 
+
 @socketio.on('button', namespace='/unloading')
 def on_button(data):
+    global schedule_time, begin_time, end_time
+    global inStop, robotConn, maint
     print('unloading ',data)
     com, address = data.split()
 #0: completed
@@ -111,16 +172,42 @@ def on_button(data):
 #3: scheduled
     cursor = db.cursor(pymysql.cursors.DictCursor)
     if com == "clear":
+        print(inStop)
+        if maint or not inStop or not robotConn:
+            cursor.close()
+            return
+        inStop=False
+        #TODO partial order
         now = datetime.now()
-        cursor.execute("UPDATE orders SET filldate='%s' WHERE pending='2' and address='%s'"%(now,address))
-        db.commit()
-        cursor.execute("UPDATE orders SET delivery_order=NULL WHERE pending='2' and address='%s'"%address)
-        db.commit()
-        cursor.execute("UPDATE orders SET pending='0' WHERE pending='2' and address='%s'"%address)
-        db.commit()
 
+        # cursor.execute("SELECT address, cast(sum(red) as unsigned) red, cast(sum(green) as unsigned) green, cast(sum(blue) as unsigned) blue FROM scheduling WHERE pending='2' AND address='%s'"%(address))
+        # orders=cursor.fetchall()
+        cursor.execute("SELECT address, red, green, blue, id FROM scheduling WHERE pending='2' AND address='%s'" % (address))
+        orders = cursor.fetchall()
+        for order in orders:
+            cursor.execute("insert into clicklogs(status, red, green, blue, begin, end, orderid) values('unload','%d','%d','%d', '%s','%s','%d')"\
+                           %(order['red'], order['green'], order['blue'], begin_time, now, order['id']))
+            db.commit()
+
+        cursor.execute("SELECT id, is_last FROM scheduling WHERE pending='2' AND address='%s'" % (address))
+        orders_ = cursor.fetchall()
+        for order in orders_:
+            if order['is_last']==0:
+                cursor.execute("UPDATE scheduling SET delivery_order=NULL, pending='0' WHERE id='%d' AND pending='2'" % (order['id']))
+                db.commit()
+            else:
+                cursor.execute(
+                    "SELECT cast(sum(red) as unsigned) red, cast(sum(green) as unsigned) green, cast(sum(blue) as unsigned) blue FROM scheduling WHERE id='%d'"% (order['id']))
+                idxorders = cursor.fetchall()
+                idxorders=idxorders[0]
+                cursor.execute("UPDATE orders SET red='%d', green='%d', blue='%d', filldate='%s', delivery_order=NULL, pending='0' WHERE id='%d'" \
+                               % (idxorders['red'], idxorders['green'], idxorders['blue'], now, order['id']))
+                db.commit()
+                cursor.execute("DELETE FROM scheduling WHERE id='%s'" % (order['id']))
+                db.commit()
         ###next scheduled number
-        cursor.execute("SELECT address, red, green, blue FROM orders WHERE pending='2' order by delivery_order")
+        #cursor.execute("SELECT address, red, green, blue FROM orders WHERE pending='2' order by delivery_order")
+        cursor.execute("SELECT address, cast(sum(red) as unsigned) red, cast(sum(green) as unsigned) green, cast(sum(blue) as unsigned) blue FROM scheduling WHERE pending='2' group by address order by delivery_order")
         orders=cursor.fetchall()
 
        
@@ -131,10 +218,30 @@ def on_button(data):
         #if address ==next_address:
         #    print("more package to unload")
         socketio.emit('message', com+' '+str(next_address), namespace='/robot')
+        socketio.emit('refresh', orders, namespace='/unloading')
+
+        ####inventory replenishment
+        inventory=Counter({'red':24, 'green':24, 'blue':24})
+        init_r, init_g, init_b = 24, 24, 24
+        shipping_r, shipping_g, shipping_b = 0,0,0
+        cursor.execute("SELECT red, blue, green FROM scheduling where pending='2'")
+        shipping=cursor.fetchall()
+
+        shipping_sum=Counter()
+        for s in shipping:
+            shipping_sum.update(s)
+        #shipping_sum=sum(map(Counter, shipping), Counter())
+        inventory.subtract(shipping_sum)
+        cursor.execute("UPDATE inventory  SET red='%s', green='%s', blue='%s'" % (inventory['red'], inventory['green'], inventory['blue']))
+        db.commit()
+        socketio.emit('inventory', inventory,namespace='/loading')
+        socketio.emit('inventory', inventory,namespace='/monitoring')
     cursor.close()
 
 @socketio.on('button', namespace='/loading')
 def on_button(data):
+    global schedule_time, begin_time, end_time
+    global inStop, robotConn, maint
     print('loading '+data)
     com, address = data.split()
 #0: completed
@@ -143,21 +250,33 @@ def on_button(data):
 #3: scheduled
     cursor = db.cursor(pymysql.cursors.DictCursor)
     if com =="reset":
-        cursor.execute("UPDATE orders SET pending='1' WHERE pending='2'")
+        inStop=True
+        print(inStop)
+        cursor.execute("SELECT id, cast(sum(red) as unsigned) red, cast(sum(green) as unsigned) green, cast(sum(blue) as unsigned) blue from scheduling where pending in ('2','3') group by id")
+        scheduled=cursor.fetchall()
+        for e in scheduled:
+            cursor.execute("SELECT red, green, blue FROM orders WHERE id='%d'"%(e['id']))
+            orig=cursor.fetchone()
+            cursor.execute("UPDATE orders SET red='%d', green='%d', blue='%d' WHERE id='%d'"%(orig['red']+e['red'], orig['green']+e['green'],orig['blue']+e['blue'],e['id']))
+            cursor.execute("DELETE FROM scheduling WHERE id='%d' AND pending in ('2','3')"%(e['id']))
         db.commit()
-        #cursor.execute("SELECT id, address, red, green, blue FROM orders WHERE pending='1'")
-        #pend_list=cursor.fetchall()
-        #print(type(pend_list))
+
+        socketio.emit('reset', (), namespace='/robot')
         socketio.emit('refresh', (), namespace='/loading')
+        socketio.emit('refresh', (), namespace='/unloading')
 
     elif com == "complete":
-        cursor.execute("UPDATE orders SET pending='2' WHERE pending='3'")
+        print(inStop, robotConn)
+        if maint or not inStop or not robotConn:
+            cursor.close()
+            return
+        inStop = False
+        cursor.execute("UPDATE scheduling SET pending='2' WHERE pending='3'")
         db.commit()
 
         ##next address
-        #cursor.execute("SELECT address, red, blue, green FROM orders WHERE pending='2' ORDER BY delivery_order")
-        cursor.execute("SELECT address, red, blue, green FROM orders WHERE pending='2'")
 
+        cursor.execute("SELECT address, cast(sum(red) as unsigned) red, cast(sum(green) as unsigned) green, cast(sum(blue) as unsigned) blue FROM scheduling WHERE pending='2' group by address order by delivery_order")
         c_orders = cursor.fetchall()
         #print("c_orders : ",c_orders)
         if len(c_orders)==0:
@@ -168,87 +287,79 @@ def on_button(data):
         #cursor.execute("SELECT red, blue, green, pending=2 FROM orderdb.orders")
         #c_orders = cursor.fetchall()
 
-        current_orders = c_orders
-        current_orders_r = 0
-        current_orders_g = 0
-        current_orders_b = 0
-
-        for i in range(len(current_orders)):
-            current_orders_r += current_orders[i]['red']
-            current_orders_g += current_orders[i]['green']
-            current_orders_b += current_orders[i]['blue']
+        #current_orders=sum(map(Counter, c_orders), Counter())
+        current_orders=Counter()
+        for c in c_orders:
+            current_orders.update(c)
+        cursor.execute("insert into clicklogs(status, red, green, blue, schedule, begin, end) values('load','%d','%d','%d','%s','%s','%s')"%(current_orders['red'],current_orders['green'],current_orders['blue'],schedule_time, begin_time,datetime.now()))
+        db.commit()
 
         cursor.execute("SELECT red, blue, green FROM inventory")
-        inventory = cursor.fetchall()
+        #inventory = Counter(cursor.fetchall()[0])
+        inventory = Counter({'red':24, 'green':24, 'blue':24})
+        inventory.subtract(current_orders)
 
-        inventory_r = inventory[0]['red']
-        inventory_g = inventory[0]['green']
-        inventory_b = inventory[0]['blue']
-
-        inventory_r -= current_orders_r
-        inventory_g -= current_orders_g
-        inventory_b -= current_orders_b
-
-        update_inventory_r = "UPDATE inventory SET red='%d' " % (inventory_r)
-        cursor.execute(update_inventory_r)
+        update_inventory = "UPDATE inventory SET red='%d', green='%d', blue='%d'" % (inventory['red'], inventory['green'], inventory['blue'])
+        cursor.execute(update_inventory)
         db.commit()
-        update_inventory_g = "UPDATE inventory SET green='%d'" % (inventory_g)
-        cursor.execute(update_inventory_g)
-        db.commit()
-        update_inventory_b = "UPDATE inventory SET blue='%d'" % (inventory_b)
-        cursor.execute(update_inventory_b)
-        db.commit()
-
-        #print(current_orders_r)
-        #print(inventory)
-        ###complete
-        #cursor.execute("UPDATE orders SET pending='2' WHERE pending='3'")
-        #db.commit()
-        print("c_orders: ", c_orders)
         socketio.emit('refresh', c_orders, namespace='/unloading')
-        inventory_dict = {'red':inventory_r,'green':inventory_g,'blue':inventory_b}
-        socketio.emit('inventory', inventory_dict,namespace='/loading')
+        socketio.emit('refresh', None, namespace='/loading')
+        socketio.emit('inventory', inventory,namespace='/loading')
+        socketio.emit('inventory', inventory,namespace='/monitoring')
         
         socketio.emit("message", com+' '+str(next_address), namespace='/robot')
-    elif com == "schedule":
-        cursor.execute("UPDATE orders SET delivery_order=NULL WHERE pending='3'")
-        db.commit()
-        cursor.execute("UPDATE orders SET pending='1' WHERE pending='3'")
+    #elif com == "schedule":
+    if com == "schedule" or com == "complete":
+        schedule_time=datetime.now()
+        cursor.execute("SELECT id, red, green, blue from scheduling where pending='3'")
+        scheduled=cursor.fetchall()
+        for e in scheduled:
+            cursor.execute("SELECT red, green, blue FROM orders WHERE id='%d'"%(e['id']))
+            orig=cursor.fetchall()[0]
+            cursor.execute("UPDATE orders SET red='%d', green='%d', blue='%d' WHERE id='%d'"%(orig['red']+e['red'], orig['green']+e['green'],orig['blue']+e['blue'],e['id']))
+            cursor.execute("DELETE FROM scheduling WHERE id='%d' AND pending='3'"%(e['id']))
         db.commit()
         cursor.execute("SELECT id, address, red, green, blue FROM orders WHERE pending='1'")
         pend_list=cursor.fetchall()
 
         ###schedule
-        schedule.schedule(pend_list,cursor, db, max_cap=50)
-        cursor.execute("SELECT id, address, red, green, blue FROM orders WHERE pending='3'")
-        #cursor.execute("SELECT id, address, red, green, blue, pending FROM orders")
-        pend_list = cursor.fetchall()
-        print("scheduling list: ", pend_list)
+        update_list, schedule_list = schedule.schedule([p for p in pend_list if p['red']+p['green']+p['blue']!=0], 24)
+        for s in schedule_list:
+            cursor.execute("INSERT into scheduling(id,address,red,green,blue,delivery_order,is_last,pending) VALUES ('%d','%d','%d','%d','%d','%d','%d','3')"\
+                           %(s['id'],s['address'],s['red'],s['green'],s['blue'],s['delivery_order'],s['is_last']))
+            #print("init_schedule: ", s)
 
-        socketio.emit('refresh', pend_list, namespace='/loading')
+        for e in update_list:
+            cursor.execute("UPDATE orders SET red='%d', green='%d', blue='%d' WHERE id='%d'"%(e['red'],e['green'],e['blue'],e['id']))
+            #print("init_update: ", e)
+        db.commit()
+
+        cursor.execute("SELECT id, address, red, green, blue FROM scheduling WHERE pending='3'")
+        pend_list = cursor.fetchall()
+        c_orders=Counter()
+        for p in pend_list:
+            c_orders.update(p)
+        #c_orders=sum(map(Counter, pend_list), Counter())
+
+        socketio.emit('refresh', c_orders, namespace='/loading')
     elif com =="replenish":
         ####inventory replenishment
-        init_r, init_g, init_b = 26, 26, 26
+        inventory=Counter({'red':24, 'green':24, 'blue':24})
+        init_r, init_g, init_b = 24, 24, 24
         shipping_r, shipping_g, shipping_b = 0,0,0
-        cursor.execute("SELECT red, blue, green FROM orders where pending='2'")
+        cursor.execute("SELECT red, blue, green FROM scheduling where pending='2'")
         shipping=cursor.fetchall()
 
-        for i in range(len(shipping)):
-            shipping_r += shipping[i]['red']
-            shipping_g += shipping[i]['green']
-            shipping_b += shipping[i]['blue']
-        shipping_r = init_r - shipping_r
-        shipping_g = init_g - shipping_g
-        shipping_b = init_b - shipping_b
+        #shipping_sum=sum(map(Counter, shipping), Counter())
+        shipping_sum=Counter()
+        for s in shipping:
+            shipping_sum.update(s)
+        inventory.subtract(shipping_sum)
+        cursor.execute("UPDATE inventory  SET red='%s', green='%s', blue='%s'" % (inventory['red'], inventory['green'], inventory['blue']))
+        db.commit()
+        socketio.emit('inventory', inventory,namespace='/loading')
+        socketio.emit('inventory', inventory,namespace='/monitoring')
 
-        cursor.execute("UPDATE inventory  SET red='%s'" % (shipping_r))
-        db.commit()
-        cursor.execute("UPDATE inventory  SET green='%s'" % (shipping_g))
-        db.commit()
-        cursor.execute("UPDATE inventory  SET blue='%s'" % (shipping_b))
-        db.commit()
-        inventory_dict = {'red':shipping_r,'green':shipping_g,'blue':shipping_b}
-        socketio.emit('inventory', inventory_dict,namespace='/loading')
     cursor.close()
 #from app.modules import buttonio
 

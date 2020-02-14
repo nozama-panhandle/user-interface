@@ -20,5 +20,8 @@ cursor = db.cursor(pymysql.cursors.DictCursor)
 def empty_orders():
     cursor.execute("DELETE FROM orders")
     db.commit()
-
+    cursor.execute("DELETE FROM scheduling")
+    db.commit()
+    cursor.execute("DELETE FROM clicklogs")
+    db.commit()
 empty_orders()

@@ -3,12 +3,12 @@
 {% block content %}
     <div class="container-fluid" style="height: 130px; border-bottom: 1px dotted #d32f2f;">
         <div class="row" style="height: 70px;">
-            <p class="h1" style="color: #424242; height: 60px; line-height: 60px;">Operation Dashboard</p>
+            <p class="h1" style="color: #424242; height: 60px; line-height: 60px;">Dashboard</p>
         </div>
         <div class="row" class="height: 60px; margin: 0px -15px 10px; background-color: #9a0007">
             <div class="col-6" style="height: 50px;">    
-                <button id="monitoring" type="button" class="btn btn-danger" style="float: left; width:180px; height:50px;" checked>
-                    <span class="align-middle font-weight-normal" style="color: #ffffff">Monitoring</span>
+                <button id="monitoring" type="button" class="btn btn-secondary" style="float: left; width:180px; height:50px;" checked>
+                    <span class="align-middle font-weight-normal" style="color: #424242">Operation</span>
                 </button>
             </div>
             <div class="col-6" style="height: 50px;">    
@@ -21,11 +21,40 @@
 
     <div class="container-fluid" style="height: 10px;">
         <div class="row" style="height: 10px;"></div>
+            <!-- <p id="progress"></p> -->
     </div>
 
-    <div class="container-fluid" style="height: 50px;">
+    <div class="container-fluid" style="height: 150px;">
+        <div class="row" style="height: 70px;">
+            <div class="col" style="height: 50px; margin: 10px 0px;">
+                <p class="h2" style="color: #424242; height: 50px; line-height: 50px;">Inventory</p>  	 
+            </div>
+        </div>
+        <div class="row" style="height: 80px; margin: 0px 0px 10px;">
+            <table class="table table-borderless" style="height: 80px; text-align: center;">
+                <tr>
+	                <td class="w-25 align-middle table-danger rounded">
+                        <p id="inven_red" class="h2 text-black-50 font-weight-normal"></p>
+                    </td>
+	                <td class="w-25 align-middle table-success rounded">
+                        <p id="inven_green" class="h2 text-black-50 font-weight-normal"></p>
+                    </td>
+	                <td class="w-25 align-middle table-primary rounded">
+                        <p id="inven_blue" class="h2 text-black-50 font-weight-normal"></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+   <div class="container-fluid" style="height: 570px;">
+        <div class="row" style="height: 70px;">
+            <div class="col" style="height: 50px; margin: 10px 0px;">
+                <p class="h2" style="color: #424242; height: 50px; line-height: 50px;">Video Streaming</p>  	 
+            </div>
+        </div>
         <div class="row" style="height: 500px;">
-                <img src="http://rpi-6.wifi.local.cmu.edu:8888/video_feed" alt="rasp-pi robot camera" class="rounded mx-auto d-block" width="640" height="480" style="background-color: #e0e0e0; border: 2px solid #ffc209;">
+                <img src="http://rpi-6.wifi.local.cmu.edu:8888/video_feed" alt="rasp-pi robot camera" class="rounded mx-auto d-block" width="320" height="240" style="background-color: #e0e0e0; border: 2px solid #ffc209;">
         </div>
     </div>
 
@@ -34,49 +63,50 @@
         socket.on('connect', function(){
             console.log('Connected!');
         });
+
+        socket.on('inventory', function(msg){
+            console.log(msg);
+            $("#inven_red").text(msg['red']);
+            $("#inven_green").text(msg['green']);
+            $("#inven_blue").text(msg['blue']);
+        });
+
+        // socket.on('progress', function(msg){
+        //   console.log(msg);
+        //   $("#progress").text(msg);
+        //});
+
         socket.on('refresh', function(msg){
             p_maintenance = $('#maintenance').parent();
             c_maintenance = $('#maintenance').children();
-            //p_maintenance = $('#maintenance').parent().get(0);
             p_monitoring = $('#monitoring').parent();
             c_monitoring = $('#monitoring').children();
-            //p_monitoring = $('#monitoring').parent().get(0);
             
             console.log(msg);
             
             if(msg == 0){
-                //$('#maintenance').prop("checked",false);
                 $('#maintenance').prop("checked", false);
-                //$('#monitoring').prop("checked",true);
                 $('#monitoring').prop("checked", true);
-               // p_maintenance.removeClass("active focus btn-success");
                 $('#maintenance').removeClass("btn-danger");
                 $('#maintenance').addClass("btn-secondary")
                c_maintenance.css("color", "#424242")
-               // $("#maintenance").focusout();
                 p_maintenance.focusout();
-               // p_monitoring.addClass("active btn-secondary");
                 $('#monitoring').removeClass("btn-secondary")
                 $('#monitoring').addClass("btn-danger");
                 c_monitoring.css("color", "#ffffff")
             }
             else {
-                //$('#maintenance').prop("checked", true);
                 $('#maintenance').prop("checked", true);
-                //$('#monitoring').prop("checked", false);
                 $('#monitoring').prop("checked", false);
-                // p_monitoring.removeClass("active focus btn-danger");
                 $('#monitoring').removeClass("btn-danger");
                 $('#monitoring').addClass("btn-secondary");
                 c_monitoring.css("color", "#424242")
-                //$("#monitoring").focusout();
                 p_monitoring.focusout();
-                // p_maintenance.addClass("active btn-secondary");
                 $('#maintenance').removeClass("btn-secondary")
                 $('#maintenance').addClass("btn-danger");
                 c_maintenance.css("color", "#ffffff")
             }
-       });
+        });
     
 
     $(document).keydown(function(e){
