@@ -1,0 +1,119 @@
+{% extends '/layout.html' %}
+
+{% block content %}
+    <div class="container-fluid container-topic-load divide-content">
+        <div class="row row-topic">
+            <p class="h1 h1-topic">Loading Package</p>
+        </div>
+
+    <script>
+        var socket=io.connect('http://'+document.domain+':'+location.port+'/loading');
+        socket.on('arrived', function(msg){
+            alert('Package is arrived');
+        });
+        socket.on('connect', function(){console.log('Connected!');});
+        socket.on('refresh', function(msg){
+            console.log(msg);
+            if(msg!=null){
+                $("#curr_red").text(msg[0]['red']);
+                $("#curr_green").text(msg[0]['green']);
+                $("#curr_blue").text(msg[0]['blue']);
+            }
+            else{
+                $("#curr_red").text(0);
+                $("#curr_green").text(0);
+                $("#curr_blue").text(0);
+            }
+        });
+
+        socket.on('inventory', function(msg){
+            console.log(msg);
+            $("#inven_red").text(msg['red']);
+            $("#inven_green").text(msg['green']);
+            $("#inven_blue").text(msg['blue']);
+        });
+
+
+	    function reset() {
+            console.log("reset")
+            socket.emit('button', "reset n");
+        }
+        function schedule() {
+            console.log("schedule")
+            socket.emit('button', "schedule n");
+        }
+        function complete() {
+            console.log("complete")
+            socket.emit('button', "complete n");
+        }
+        function replenish() {
+            console.log("replenish")
+            socket.emit('button', "replenish n");
+        }
+    </script>
+
+        <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups" style="height: 60px;">
+            <div class="btn-group" role="group" aria-label="First group" style="height: 50px;">
+                <button type="button" class="btn" style="width: 180px; background-color: #ffc209;" onclick="schedule()">
+                    <span class="align-middle font-weight-normal" style="color: #424242">Schedule Delivery</span>
+                </button>
+                <button type="button" class="btn" style="width: 180px; background-color: #bdbdbd;" onclick="complete()">
+                    <span class="align-middle font-weight-normal" style="color: #424242">Start Delivery</span>
+                </button>
+            </div>
+            <div class="btn-group" role="group" aria-label="Second group" style="height: 50px;">
+                <button type="button" class="btn" style="width: 180px; background-color: #9a0007;" onclick="reset()">
+                    <span class="align-middle font-weight-normal" style="color: #ffffff">Reset Schedule</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid container-content1-load divide-content">
+        <div class="row row-content-topic">
+            <p class="h2 h2-content-topic">Next Packages to Load</p>
+        </div>
+        <div class="row row-content-table-load">
+            <table class="table table-borderless table-content-load" style="text-align: center;">
+                <tr>
+	                <td class="w-25 align-middle bg-danger rounded">
+                        <p id="curr_red" class="h2 text-white font-weight-normal"></p>
+                    </td>
+	                <td class="w-25 align-middle bg-success rounded">
+                        <p id="curr_green" class="h2 text-white font-weight-normal"></p>
+                    </td>
+	                <td class="w-25 align-middle bg-primary rounded">
+                        <p id="curr_blue" class="h2 text-white font-weight-normal"></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="container-fluid container-content">
+        <div class="row row-content-topic">
+            <p class="h2 h2-content-topic">Stocks in Inventory</p>  	 
+        </div>
+        <div class="row row-content-table-load">
+            <table class="table table-borderless table-content-load" style="text-align: center;">
+                <tr>
+	                <td class="w-25 align-middle table-danger rounded">
+                        <p id="inven_red" class="h2 text-white font-weight-normal"></p>
+                    </td>
+	                <td class="w-25 align-middle table-success rounded">
+                        <p id="inven_green" class="h2 text-white font-weight-normal"></p>
+                    </td>
+	                <td class="w-25 align-middle table-primary rounded">
+                        <p id="inven_blue" class="h2 text-white font-weight-normal"></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="row row-content-btn">
+            <button class="btn btn-block btn-content" type="button" onclick="replenish()">
+                <span class="align-middle" style="color: #424242;">Replenish the inventory</span>
+            </button>
+        </div>
+    </div>
+
+{% endblock %}

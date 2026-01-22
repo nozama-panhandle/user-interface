@@ -1,0 +1,121 @@
+{% extends '/layout.html' %}
+
+{% block content %}
+    <div class="container-fluid" style="height: 130px; border-bottom: 1px dotted #d32f2f;">
+        <div class="row" style="height: 70px;">
+            <p class="h1" style="color: #424242; height: 60px; line-height: 60px;">Loading Packages</p>
+        </div>
+
+    <script>
+        var socket=io.connect('http://'+document.domain+':'+location.port+'/loading');
+        socket.on('arrived', function(msg){
+            alert('Delivery robot has arrived.\nReplenish the inventory!');
+        });
+        socket.on('connect', function(){console.log('Connected!');});
+        socket.on('refresh', function(msg){
+            console.log(msg);
+            if(msg!=null){
+                $("#curr_red").text(msg['red']);
+                $("#curr_green").text(msg['green']);
+                $("#curr_blue").text(msg['blue']);
+            }
+            else{
+                $("#curr_red").text(0);
+                $("#curr_green").text(0);
+                $("#curr_blue").text(0);
+            }
+        });
+
+        socket.on('inventory', function(msg){
+            console.log(msg);
+            $("#inven_red").text(msg['red']);
+            $("#inven_green").text(msg['green']);
+            $("#inven_blue").text(msg['blue']);
+        });
+
+
+	    function reset() {
+            console.log("reset")
+            socket.emit('button', "reset n");
+        }
+        function schedule() {
+            console.log("schedule")
+            socket.emit('button', "schedule n");
+        }
+        function complete() {
+            console.log("complete")
+            socket.emit('button', "complete n");
+        }
+        function replenish() {
+            console.log("replenish")
+            socket.emit('button', "replenish n");
+        }
+    </script>
+
+        <div class="row" style="height: 50px; margin: 0px -15px 10px;">
+            <div class="col-8" style="height: 50px;">
+                <button type="button" class="btn btn-warning" style="float:left; height: 50px; width: 120px; margin-right: 10px;" onclick="schedule()">
+                    <span class="align-middle font-weight-normal" style="color: #424242">Schedule</span>
+                </button>
+                <button type="button" class="btn btn-secondary" style="float:left; height: 50px; width: 120px;" onclick="complete()">
+                    <span class="align-middle font-weight-normal" style="color: #ffffff">Start</span>
+                </button>
+            </div>
+            <div class="col-4" style="height: 50px;">
+                <button type="button" class="btn btn-danger" style="float:right; height: 50px; width: 120px;" onclick="reset()">
+                    <span class="align-middle font-weight-normal" style="color: #ffffff">Reset</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid" style="height: 240px; border-bottom: 1px dotted #d32f2f;">
+        <div class="row" style="height: 60px; margin:10px 0px;">
+            <p class="h2" style="color: #424242; height: 50px; line-height: 50px;">Next Packages</p>
+        </div>
+        <div class="row" style="height: 160px; margin: 0px 0px 10px;">
+            <table class="table table-borderless" style="height:150px; text-align: center;">
+                <tr>
+	                <td class="w-25 align-middle bg-danger rounded">
+                        <p id="curr_red"class="h2 text-white font-weight-normal"></p>
+                    </td>
+	                <td class="w-25 align-middle bg-success rounded">
+                        <p id="curr_green" class="h2 text-white font-weight-normal"></p>
+                    </td>
+	                <td class="w-25 align-middle bg-primary rounded">
+                        <p id="curr_blue" class="h2 text-white font-weight-normal"></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="container-fluid" style="height: 240px;">
+        <div class="row" style="height: 70px;">
+            <div class="col-7" style="height: 50px; margin: 10px 0px;">
+                <p class="h2" style="color: #424242; height: 50px; line-height: 50px;">Inventory</p>  	 
+            </div>
+                <div class="col-5" style="height: 50px; margin: 10px 0px;">
+                <button class="btn btn-warning" type="button" style="float: right; height: 50px; width: 120px;" onclick="replenish()">
+                    <span class="align-middle" style="color: #424242;">Replenish</span>
+                </button>
+            </div>
+        </div>
+        <div class="row" style="height: 160px; margin: 0px 0px 10px;">
+            <table class="table table-borderless" style="height: 150px; text-align: center;">
+                <tr>
+	                <td class="w-25 align-middle table-danger rounded">
+                        <p id="inven_red" class="h2 text-black-50 font-weight-normal"></p>
+                    </td>
+	                <td class="w-25 align-middle table-success rounded">
+                        <p id="inven_green" class="h2 text-black-50 font-weight-normal"></p>
+                    </td>
+	                <td class="w-25 align-middle table-primary rounded">
+                        <p id="inven_blue" class="h2 text-black-50 font-weight-normal"></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}

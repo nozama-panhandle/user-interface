@@ -1,0 +1,139 @@
+:root {
+  --panhandle-red: #9a0007;
+  --panhandle-yellow: #ffc209;
+  --panhandle-gray: #bdbdbd;
+  --panhandle-text-black: #424242;
+  --panhandle-text-white: #ffffff;
+}
+
+
+/* Customed css sources */
+.container-topic{
+    height: 70px !important;
+}
+
+.container-topic-load{
+    height: 140px !important;
+}
+
+.row-topic{
+    height: 70px !important;
+}
+
+.h1-topic{
+    color: #424242 !important;
+    height: 60px !important;
+    line-height: 60px !important;
+}
+
+.divide-content{
+    border-bottom: 1px dotted #d32f2f !important;
+}
+
+.container-content{
+    height: 290px !important;
+}
+
+.container-content1-load{
+    height: 230px !important;
+}
+
+.row-content-topic{
+    height: 60px !important;
+}
+
+.h2-content-topic{
+    color: #424242 !important;
+    height: 50px !important;
+    line-height: 50px !important;
+}
+
+.row-content-table-unload{
+    height: 170px !important;
+}
+
+.row-content-table-load{
+    height: 160px !important;
+}
+
+.table-content-unload{
+    height: 160px !important;
+}
+
+.table-content-load{
+    height: 150px !important;
+}
+
+.row-content-btn{
+    height: 60px !important;
+}
+.btn-block.btn-content{
+    height: 50px;
+    background-color: #ffc209;
+    border-width: 2px;
+}
+
+.btn.btn-content:hover{
+    background-color: #fff451;
+}
+
+.container-content2-unload{
+    height: auto !important;
+}
+
+.btn-panhandle-red {
+  color: #ffffff;
+  background-color: #d32f2f;
+  border-color: #d32f2f;
+}
+
+.btn-panhandle-red:hover {
+  color: #ffffff;
+  background-color: #9a0007;
+  border-color: #9a0007;
+}
+
+.btn-panhandle-red:focus, .btn-panhandle-red.focus {
+  color: #ffffff;
+  background-color: #9a0007;
+  border-color: #9a0007;
+  box-shadow: 0 0 0 0.2rem rgba(255, 102, 89, 0.5);
+}
+
+.btn-panhandle-yellow {
+  color: #424242;
+  background-color: #ffc209;
+  border-color: #ffc209;
+}
+
+.btn-panhandle-yellow:hover {
+  color: #424242;
+  background-color: #c79200;
+  border-color: #c79200;
+}
+
+.btn-panhandle-yellow:focus, #btn-panhandle-yellow.focus {
+  color: #424242;
+  background-color: #c79200;
+  border-color: #c79200;
+  box-shadow: 0 0 0 0.2rem rgba(255, 244, 81, 0.5);
+}
+
+.btn-panhandle-gray {
+  color: #424242;
+  background-color: #bdbdbd;
+  border-color: #bdbdbd;
+}
+
+.btn-panhandle-gray:hover {
+  color: #424242;
+  background-color: #8d8d8d;
+  border-color: #8d8d8d;
+}
+
+.btn-panhandle-gray:focus, .btn-panhandle-gray.focus {
+  color: #424242;
+  background-color: #8d8d8d;
+  border-color: #8d8d8d;
+  box-shadow: 0 0 0 0.2rem rgba(239, 239, 239, 0.5);
+}
