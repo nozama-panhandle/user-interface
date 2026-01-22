@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>Loading Page</title>
+	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
 </head>
 <body>
 	<h1>Nozama Panhandle</h1>
@@ -15,7 +16,8 @@
                 document.write('<li><a href="http://mellon.andrew.cmu.edu:8888/' + page_list[page_idx].toLowerCase() + '">' + page_list[page_idx] + '</a></li>');
                 page_idx = page_idx + 1;
             }
-        </script>
+		</script>
+		
     </ul>
 
 	<h2>Page for Package Loading</h2>
@@ -39,25 +41,25 @@
 		// console.log(htmlDocument.outerHTML)
 		</script>
 	 </div>
-	<h2>Current packages</h2>
-	<ul>
-		<script>
-			var color_idx = 0;
-			while(color_idx < package_color.length) {
-				document.write('<li>' + package_color[color_idx] + '</li>');
-				color_idx = color_idx + 1;
-			}
-		</script>
-	</ul>
 
-	<h2>Upcoming packages</h2>
+	
 	<ul>
 		<script>
 			var color_idx = 0;
 			while(color_idx < package_color.length) {
 				document.write('<li>' + package_color[color_idx] + '</li>');
 				color_idx = color_idx + 1;
-			}
+			}                
+			// var req = new XMLHttpRequest();  
+			// req.open('GET', 'http://mellon.andrew.cmu.edu:3000/api/pending', false);   
+			// req.send(null);  
+			// if(req.status == 200)  
+			// 	dump(req.responseText); 
+			// var _html = document.getElementsByTagName('pre')[0].innerHTML;
+			// console.log(_html)
+			// window.location.href = "http://mellon.andrew.cmu.edu:3000/api/pending";
+			
+
 		</script>
 	</ul>
 
